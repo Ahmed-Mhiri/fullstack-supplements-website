@@ -40,5 +40,5 @@ This project is an online store for supplements, featuring user authentication, 
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/your-username/supplements-website.git
+   git clone https://github.com/Ahmed-Mhiri/fullstack-supplements-website
    cd supplements-website/frontend
