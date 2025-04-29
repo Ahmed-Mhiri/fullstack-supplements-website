@@ -1,11 +1,13 @@
-<div *ngFor="let supplement of supplements">
-    <div class="supplement-card">
-      <h2>{{ supplement.name }}</h2>
-      <p>{{ supplement.description }}</p>
-      <p><strong>Price:</strong> ${{ supplement.price }}</p>
-      <p *ngIf="supplement.discount !== 'No'">
-        <strong>Price after discount:</strong> ${{ supplement.priceAfterDiscount }}
-      </p>
+<div class="supplement-grid">
+  <div class="supplement-card" *ngFor="let supplement of supplements">
+    <img [src]="supplement.imageUrl" alt="{{ supplement.name }}" class="product-image" />
+
+    <h2>{{ supplement.name }}</h2>
+
+    <div class="price-info">
+      €{{ supplement.priceEuro }}
     </div>
+
+    <button class="buy-button">Buy Now</button>
   </div>
-  
+</div>

@@ -3,11 +3,13 @@ import { Supplement} from '../../models/supplement.model';
 import { SupplementService } from '../../services/supplement.service'; 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-supplement-card',
   templateUrl: './supplement-card.component.html',
-  imports: [CommonModule,FormsModule],  // Import any necessary modules here
+  imports: [CommonModule,FormsModule,CardModule,ButtonModule],  // Import any necessary modules here
   standalone: true,
   styleUrls: ['./supplement-card.component.scss']
 })

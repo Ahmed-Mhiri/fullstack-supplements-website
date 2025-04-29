@@ -6,13 +6,14 @@ import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { CommonModule } from '@angular/common';
 import { SupplementCardComponent } from './components/supplement-card/supplement-card.component';
-import { HttpClientModule } from '@angular/common/http';  // Import HttpClientModule
+import { HttpClientModule } from '@angular/common/http';
+import { NavbarComponent } from "./components/navbar/navbar.component";
 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet,HttpClientModule, InputTextModule, ButtonModule, MessageModule, FormsModule, SupplementCardComponent],
+  imports: [CommonModule, RouterOutlet, HttpClientModule, InputTextModule, ButtonModule, MessageModule, FormsModule, SupplementCardComponent, NavbarComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

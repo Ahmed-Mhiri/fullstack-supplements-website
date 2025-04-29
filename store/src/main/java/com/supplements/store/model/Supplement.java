@@ -2,9 +2,14 @@ package com.supplements.store.model;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+
 
 @Entity
-@JsonPropertyOrder({"id", "name", "description", "category", "goal", "price","discount", "discountPercentage", "priceAfterDiscount"})
+@JsonPropertyOrder({
+        "id", "name", "priceEuro", "imageUrl", "productUrl", "flavor", "weightVolume",
+        "brand", "category", "goals"
+})
 public class Supplement {
 
     @Id
@@ -12,87 +17,113 @@ public class Supplement {
     private Long id;
 
     private String name;
-    private String description;
-    private Double price;
-    private Double priceAfterDiscount;
+
+    // Store price as BigDecimal for precision
+    private BigDecimal priceEuro;
+
+    private String imageUrl;
+    private String productUrl;
+    private String flavor;
+    private String weightVolume;
+    private String brand;
     private String category;
-    private String goal;
-    private String discount;
+    private String goals;
 
-    private Integer discountPercentage;
-
+    // Default constructor
     public Supplement() {}
 
-    public Supplement(String name, String description, Double price, String discount, String category, String goal) {
+    // Constructor with parameters
+    public Supplement(String name, BigDecimal priceEuro, String imageUrl, String productUrl, String flavor,
+                      String weightVolume, String brand, String category, String goals) {
         this.name = name;
-        this.description = description;
-        this.price = price;
-        this.discount = discount;
+        this.priceEuro = priceEuro;
+        this.imageUrl = imageUrl;
+        this.productUrl = productUrl;
+        this.flavor = flavor;
+        this.weightVolume = weightVolume;
+        this.brand = brand;
         this.category = category;
-        this.goal = goal;
-        calculateDiscountedPrice();
-    }
-
-    // Auto-run after loading from database
-    @PostLoad
-    public void onLoad() {
-        calculateDiscountedPrice();
-    }
-
-    private void calculateDiscountedPrice() {
-        if (price == null || discount == null || discount.equalsIgnoreCase("No")) {
-            this.priceAfterDiscount = price;
-            this.discountPercentage = 0;
-            return;
-        }
-
-        try {
-            String[] parts = discount.split("-");
-            if (parts.length == 2) {
-                String percentageStr = parts[1].trim().replace("%", "");
-                double percentage = Double.parseDouble(percentageStr);
-                this.discountPercentage = (int) percentage;
-                this.priceAfterDiscount = price - (price * (percentage / 100));
-            } else {
-                this.priceAfterDiscount = price;
-                this.discountPercentage = 0;
-            }
-        } catch (Exception e) {
-            this.priceAfterDiscount = price;
-            this.discountPercentage = 0;
-        }
+        this.goals = goals;
     }
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) {
-        this.price = price;
-        calculateDiscountedPrice();
+    public Long getId() {
+        return id;
     }
 
-    public String getDiscount() { return discount; }
-    public void setDiscount(String discount) {
-        this.discount = discount;
-        calculateDiscountedPrice();
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public Double getPriceAfterDiscount() { return priceAfterDiscount; }
+    public String getName() {
+        return name;
+    }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getGoal() { return goal; }
-    public void setGoal(String goal) { this.goal = goal; }
+    public BigDecimal getPriceEuro() {
+        return priceEuro;
+    }
 
-    public Integer getDiscountPercentage() { return discountPercentage; }
-    public void setDiscountPercentage(Integer discountPercentage) { this.discountPercentage = discountPercentage; }
+    public void setPriceEuro(BigDecimal priceEuro) {
+        this.priceEuro = priceEuro;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getProductUrl() {
+        return productUrl;
+    }
+
+    public void setProductUrl(String productUrl) {
+        this.productUrl = productUrl;
+    }
+
+    public String getFlavor() {
+        return flavor;
+    }
+
+    public void setFlavor(String flavor) {
+        this.flavor = flavor;
+    }
+
+    public String getWeightVolume() {
+        return weightVolume;
+    }
+
+    public void setWeightVolume(String weightVolume) {
+        this.weightVolume = weightVolume;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getGoals() {
+        return goals;
+    }
+
+    public void setGoals(String goals) {
+        this.goals = goals;
+    }
 }
