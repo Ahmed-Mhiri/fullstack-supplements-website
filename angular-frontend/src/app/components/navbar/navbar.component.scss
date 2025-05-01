@@ -3,20 +3,20 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 20px;
-  background-color: #ffffff;  // White background for light theme
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); // Light shadow for soft look
+  background-color: #ffffff;
   border-radius: 10px;
+  position: relative;
 
   .logo {
     img {
-      height: 50px;
+      height: 70px;
       width: auto;
       object-fit: contain;
       transition: transform 0.2s ease-in-out;
       cursor: pointer;
 
       &:hover {
-        transform: scale(1.05);  // Slight scaling on hover
+        transform: scale(1.05);
       }
     }
   }
@@ -27,7 +27,7 @@
     position: relative;
 
     input {
-      width: 300px; // initial width
+      width: 300px;
       padding: 10px 40px 10px 20px;
       border-radius: 25px;
       border: 1px solid #ccc;
@@ -35,72 +35,118 @@
       color: #333;
       font-size: 1rem;
       box-sizing: border-box;
-    
-      // Only transition what needs to be animated
       transition: 
         border-color 0.3s ease,
         box-shadow 0.3s ease,
         background-color 0.3s ease,
         width 0.4s ease;
-    
+
       &:hover {
         background-color: #f0f0f0;
         border-color: #aaa;
       }
-    
+
       &:focus {
         outline: none;
         border-color: #FF5722;
         background-color: #fff;
         box-shadow: 0 0 0 4px rgba(255, 87, 34, 0.15);
-        width: 500px; // expand smoothly on focus
+        width: 500px;
       }
     }
+
     svg {
       position: relative;
       left: -30px;
       cursor: pointer;
       transition: transform 0.3s ease, fill 0.3s ease;
-    
-      fill: #888; // default icon color
-    
+      fill: #888;
+
       &:hover {
         transform: scale(1.2);
-        fill: #FF5722; // highlight color on hover
+        fill: #FF5722;
       }
-    
+
       &:active {
         transform: scale(1);
-        fill: #e64a19; // darker when clicked
+        fill: #e64a19;
       }
     }
   }
 
-  // Hide desktop search on small screens
+  .icons {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .icon-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      background-color: transparent;
+      transition: all 0.3s ease;
+      color: #333;
+
+      svg {
+        width: 24px;
+        height: 24px;
+        color: inherit;
+        transition: transform 0.2s ease, color 0.2s ease;
+      }
+
+      &:hover {
+        background-color: #f0f0f0;
+        transform: scale(1.1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+        svg {
+          color: #FF5722;
+        }
+      }
+    }
+  }
+  /* Hide mobile icon on large screens */
+@media (min-width: 769px) {
+  .mobile-search-icon {
+    display: none !important;
+  }
+}
+
+  // Responsive behavior for small screens
   @media (max-width: 768px) {
     .desktop-search {
       display: none;
     }
-  }
 
-  // Mobile icon (shown only on small screens)
-  .mobile-search-icon {
-    display: none;
-    cursor: pointer;
-
-    @media (max-width: 768px) {
+    .mobile-search-icon {
       display: block;
+      order: 1;
+      cursor: pointer;
+
+      svg {
+        position: relative;
+        width: 24px;
+        height: 24px;
+        bottom: -4px;
+      }
     }
 
-    svg {
-      position: relative;
-      width: 24px;
-      height: 24px;
-      bottom: -4px;
+    .logo {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      order: 2;
+    }
+
+    .icons {
+      order: 3;
+      gap: 0;
     }
   }
 
-  // Fullscreen overlay for mobile search
   .mobile-search-overlay {
     position: fixed;
     top: 0;
@@ -122,8 +168,8 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      opacity: 1; // Ensure it is visible when active
-      transform: translateX(0); // Remove any initial transform
+      opacity: 1;
+      transform: translateX(0);
       transition: opacity 0.3s ease, transform 0.3s ease;
 
       input {
@@ -147,43 +193,6 @@
 
         &:hover {
           background: #e64a19;
-        }
-      }
-    }
-  }
-  
-  
-
-  .icons {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-
-    .icon-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px;
-      border-radius: 50%;
-      cursor: pointer;
-      background-color: transparent;
-      transition: all 0.3s ease;
-      color: #333;  // Dark color for icons on a white background
-
-      svg {
-        width: 24px;
-        height: 24px;
-        color: inherit;
-        transition: transform 0.2s ease, color 0.2s ease;
-      }
-
-      &:hover {
-        background-color: #f0f0f0;  // Light gray background on hover
-        transform: scale(1.1);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  // Soft shadow on hover
-
-        svg {
-          color: #FF5722;  // Orange color for icons on hover
         }
       }
     }
