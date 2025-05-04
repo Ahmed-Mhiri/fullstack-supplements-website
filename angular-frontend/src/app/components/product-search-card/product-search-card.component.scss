@@ -1,0 +1,39 @@
+.supplement-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    max-width: 400px; /* Smaller width for compact design */
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 12px; /* To give space between cards */
+  }
+  
+  .supplement-image {
+    width: 70px; /* Smaller image size */
+    height: 70px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  .supplement-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .supplement-name {
+    margin: 0;
+    font-size: 1rem; /* Smaller font size */
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .supplement-price {
+    margin: 2px 0 0;
+    font-size: 0.9rem; /* Smaller price text */
+    color: #666;
+  }
+  

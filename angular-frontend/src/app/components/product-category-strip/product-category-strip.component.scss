@@ -34,7 +34,7 @@
     transform-origin: center;
     width: 100%;
     height: 2px;
-    background-color: #007bff; /* Customize color here */
+    background-color: #FF5722; /* Customize color here */
     transition: transform 0.3s ease;
   }
   
@@ -75,7 +75,7 @@
   }
   
   .item:hover {
-    color: #007bff;
+    color: #FF5722;
   }
   .mobile-menu {
     display: none;
@@ -86,25 +86,27 @@
     font-size: 2rem;
     cursor: pointer;
     padding: 0.5rem;
+    position: absolute;
+    top: 2px;
+    left: 1rem;
   }
   
-  /* Sidebar styles */
   .sidebar {
     position: fixed;
     top: 0;
-    left: -280px;
+    left: -280px; /* Hidden by default */
     width: 280px;
     height: 100%;
     background: #fff;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease-in-out; /* Smoother easing */
     z-index: 1000;
     overflow-y: auto;
     padding: 1rem;
   }
   
   .sidebar.open {
-    left: 0;
+    left: 0; /* Slide in from left */
   }
   
   .close-btn {
@@ -164,61 +166,20 @@
     }
   }
   /* Overlay that covers the screen */
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-  z-index: 999; /* Ensures overlay is above other content */
-  display: flex;
-  justify-content: flex-start; /* Aligns sidebar to left */
-  transition: opacity 0.3s ease; /* Smooth fade-in */
-}
-
-/* Sidebar styles */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -280px; /* Initially off-screen */
-  width: 280px;
-  height: 100%;
-  background: #fff;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000; /* Higher than overlay */
-  transition: left 0.3s ease; /* Smooth sliding effect */
-  padding: 1rem;
-  overflow-y: auto;
-}
-
-/* When sidebar is open */
-.sidebar.open {
-  left: 0; /* Slide in from left */
-}
-
-/* Make sure the close button and contents are visible */
-.close-btn {
-  font-size: 1.8rem;
-  cursor: pointer;
-  text-align: right;
-  margin-bottom: 1rem;
-}
-
-/* Mobile Menu - Hide the default menu when on mobile */
-.mobile-menu {
-  display: none;
-}
-
-/* Responsive Design: Show mobile menu on smaller screens */
-@media (max-width: 768px) {
-  .desktop-menu {
-    display: none;
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none; /* Prevents unintended activation */
+    transition: opacity 0.3s ease;
   }
-  .mobile-menu {
-    display: block;
+  
+  .overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
   }
-}
-
-  
-  

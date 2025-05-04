@@ -14,13 +14,13 @@ export class ProductCategoryStripComponent {
       title: 'Sports Nutrition',
       items: [
         'Protein', 'Amino Acids', 'Boosters', 'Carbohydrates', 'Creatine',
-        'Fitness Food', 'Fitness Packages', 'Minerals', 'Other', 'Vitamins', 'Weight Gainers'
+        'Fitness Food', 'Fitness Packages', 'Minerals', 'Vitamins', 'Weight Gainers', 'Other'
       ]
     },
     {
       title: 'Dietary Supplement',
       items: [
-        'Vitamins', 'Minerals', 'Other', 'Fitness Packages'
+        'Vitamins', 'Minerals', 'Fitness Packages', 'Other'
       ]
     },
     {

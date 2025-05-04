@@ -12,27 +12,31 @@
   <!-- Mobile Hamburger Icon -->
   <div class="mobile-menu">
     <div class="menu-icon" (click)="toggleSidebar()">
-      &#9776; <!-- Hamburger symbol -->
-    </div>
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg>    </div>
   </div>
   
   <!-- Sidebar Menu with Overlay -->
-  <div class="overlay" *ngIf="isSidebarOpen" (click)="toggleSidebar()">
-    <div class="sidebar" (click)="$event.stopPropagation()">
-      <!-- Close Button -->
-      <div class="close-btn" (click)="toggleSidebar()">×</div>
-      
-      <!-- Sidebar Content -->
-      <div class="sidebar-content">
-        <div class="sidebar-category" *ngFor="let cat of categories; let i = index">
-          <div class="sidebar-title" (click)="toggleCategory(i)">
-            {{ cat.title }}
-            <span class="arrow" [class.open]="expandedCategoryIndex === i">▾</span>
-          </div>
-          <div class="sidebar-items" *ngIf="expandedCategoryIndex === i">
-            <div *ngFor="let item of cat.items" class="sidebar-item">{{ item }}</div>
-          </div>
+  <!-- Always present overlay + sidebar container -->
+<!-- Sidebar Menu with Overlay -->
+<div class="overlay" [class.visible]="isSidebarOpen" (click)="toggleSidebar()">
+  <div class="sidebar" [class.open]="isSidebarOpen" (click)="$event.stopPropagation()">
+    <!-- Close Button -->
+    <div class="close-btn" (click)="toggleSidebar()">×</div>
+
+    <!-- Sidebar Content -->
+    <div class="sidebar-content">
+      <div class="sidebar-category" *ngFor="let cat of categories; let i = index">
+        <div class="sidebar-title" (click)="toggleCategory(i)">
+          {{ cat.title }}
+          <span class="arrow" [class.open]="expandedCategoryIndex === i">▾</span>
+        </div>
+        <div class="sidebar-items" *ngIf="expandedCategoryIndex === i">
+          <div *ngFor="let item of cat.items" class="sidebar-item">{{ item }}</div>
         </div>
       </div>
     </div>
   </div>
+</div>
+
+
+  

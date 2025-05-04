@@ -9,6 +9,8 @@
 
   .logo {
     img {
+      position: relative;
+      right: 12px;
       height: 70px;
       width: auto;
       object-fit: contain;
@@ -22,57 +24,68 @@
   }
 
   .search-wrapper {
-    display: flex;
-    align-items: center;
     position: relative;
-
+    width: fit-content;
+    font-family: 'Poppins', sans-serif;
+  
     input {
-      width: 300px;
-      padding: 10px 40px 10px 20px;
-      border-radius: 25px;
-      border: 1px solid #ccc;
-      background-color: #fafafa;
+      width: min(400px,30vw); /* Initial narrow width */
+      padding: 14px 48px 14px 20px;
+      border-radius: 30px;
+      border: 1px solid #ddd;
+      background: #fff;
       color: #333;
       font-size: 1rem;
-      box-sizing: border-box;
+      font-family: inherit;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       transition: 
-        border-color 0.3s ease,
+        width 0.4s ease, /* Smooth transition for width */
         box-shadow 0.3s ease,
-        background-color 0.3s ease,
-        width 0.4s ease;
-
-      &:hover {
-        background-color: #f0f0f0;
-        border-color: #aaa;
+        background-color 0.3s ease;
+  
+      &::placeholder {
+        color: #aaa;
+        font-weight: 300;
       }
-
+  
+      &:hover {
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      }
+  
       &:focus {
-        outline: none;
-        border-color: #FF5722;
+        width: min(600px,50vw); /* Expands to 500px when focused */
         background-color: #fff;
-        box-shadow: 0 0 0 4px rgba(255, 87, 34, 0.15);
-        width: 500px;
+        box-shadow: 0 0 0 5px rgba(255, 87, 34, 0.15); /* Focus ring */
+        outline: none;
       }
     }
-
+  
     svg {
-      position: relative;
-      left: -30px;
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
       cursor: pointer;
-      transition: transform 0.3s ease, fill 0.3s ease;
       fill: #888;
-
+      transition: transform 0.3s ease, fill 0.3s ease;
+  
       &:hover {
-        transform: scale(1.2);
+        transform: translateY(-50%) scale(1.2);
         fill: #FF5722;
       }
-
+  
       &:active {
-        transform: scale(1);
+        transform: translateY(-50%) scale(1);
         fill: #e64a19;
       }
     }
   }
+  
+  
+  
 
   .icons {
     display: flex;
@@ -125,6 +138,8 @@
       display: block;
       order: 1;
       cursor: pointer;
+      position: relative;
+      left: 50px;  
 
       svg {
         position: relative;
@@ -153,48 +168,61 @@
     left: -100%;
     width: 100%;
     height: 100vh;
-    background-color: white;
+    background-color: #fff;
     z-index: 999;
     transition: left 0.3s ease-in-out;
     display: flex;
     flex-direction: column;
-
+  
     &.active {
       left: 0;
     }
-
+  
     .mobile-search-header {
-      padding: 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      opacity: 1;
-      transform: translateX(0);
-      transition: opacity 0.3s ease, transform 0.3s ease;
-
+      padding: 1rem;
+      gap: 0.5rem;
+      background-color: #f9f9f9;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  
+      .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        .icon search-icon{
+          position: absolute;
+          right: 60px;
+        }
+        svg {
+          width: 24px;
+          height: 24px;
+          transition: fill 0.3s ease;
+        }
+  
+        &:hover svg {
+          fill: #ff5722;
+        }
+      }
+  
       input {
         flex: 1;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        box-sizing: border-box;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 10px;
         font-size: 1rem;
-        transition: all 0.3s ease;
-      }
-
-      button {
-        padding: 10px 15px;
-        background: #FF5722;
-        border: none;
-        border-radius: 8px;
-        color: white;
-        cursor: pointer;
-        transition: background 0.3s ease;
-
-        &:hover {
-          background: #e64a19;
+        outline: none;
+        transition: border-color 0.3s ease;
+  
+        &:focus {
+          border-color: #ff5722;
         }
       }
     }
   }
+  
 }
