@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
@@ -26,5 +26,33 @@ export class AppComponent {
 
   onClick() {
     this.msg = 'Welcome ' + this.text;
+  }
+  lastScrollTop: number = 0;
+  navbarContainer: HTMLElement | null = null;
+
+  constructor() {}
+
+  ngOnInit() {
+    // Get the navbar container element
+    this.navbarContainer = document.querySelector('.navbar-container');
+  }
+
+  // Detect scroll events and update the navbar's position
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    if (!this.navbarContainer) return;
+
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (currentScroll > this.lastScrollTop) {
+      // Scrolling down, hide the navbar
+      this.navbarContainer.style.top = "-100px";  // Adjust this value based on navbar height
+    } else {
+      // Scrolling up, show the navbar
+      this.navbarContainer.style.top = "0";
+    }
+
+    // Update the last scroll position
+    this.lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
   }
 }

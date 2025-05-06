@@ -1,15 +1,23 @@
-.container{
+.container {
     width: 80%;
-    margin:auto
-    
+    margin: auto;
 }
-@media (max-width: 768px) {
-    .container{
-        width: 100%;
-        margin:auto;
-        
-    }
-   
 
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        margin: auto;
+    }
+}
+
+/* Navbar container */
+.navbar-container {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    transition: top 0.3s ease; // Smooth transition for showing/hiding navbar
+    /* Follow container width rules */
+    margin: auto; // Center the navbar
 
 }

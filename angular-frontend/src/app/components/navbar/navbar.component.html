@@ -4,19 +4,36 @@
       <img src="/images/logo.jpg" alt="Logo" />
     </div>
   
-    <!-- Search Bar (Desktop) -->
-    <div class="search-wrapper desktop-search" [ngClass]="{ 'active': isSearchActive }">
-        <input
-          type="text"
-          pInputText
-          placeholder="Search for supplements, protein..."
-          (blur)="onSearchBlur()"
-          (focus)="onSearchFocus()"
-        />
-        <svg (click)="toggleSearch()" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
-          <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
-        </svg>    
+    <div class="search-wrapper desktop-search" [ngClass]="{ 'active': isSearchActive }" #searchOverlay>
+      <!-- ✅ This triggers filtering when the user types -->
+      <input
+        type="text"
+        pInputText
+        placeholder="Search for supplements, protein..."
+        (blur)="onSearchBlur($event)"
+        (focus)="onSearchFocus()"
+        [(ngModel)]="searchQuery"
+        (input)="filterProducts()"  
+        (click)="onSearchInputClick($event)"  
+      /> 
+    
+      <!-- Close Icon (click to toggle) -->
+      <svg  (click)="onSearchIconClick($event)"   xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000">
+        <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
+      </svg>    
+    </div>
+    
+    <!-- ✅ Search Overlay Section -->
+    <div class="search-overlay" *ngIf="isSearchActive">
+      <div class="search-overlay-content">
+        <!-- Filtered Products -->
+        <div class="product-results">
+          <h3>{{ searchQuery.trim() ? 'Products' : 'Top Picks' }}</h3>
+          <app-product-search-card [supplements]="productsToDisplay"></app-product-search-card>
+        </div>
       </div>
+    </div>
+
     
       <!-- Mobile Search Icon -->
       <div class="mobile-search-icon" (click)="openMobileSearch()">
@@ -35,7 +52,8 @@
           <input
             type="text"
             placeholder="Search..."
-            [(ngModel)]="mobileSearchText"
+            (input)="filterProducts()"
+            [(ngModel)]="searchQuery"
             autofocus
           />
           <button class="icon close-icon" (click)="closeMobileSearch()">
@@ -44,7 +62,12 @@
             </svg>
           </button>
         </div>
+        <div class="product-results-mobile">
+          <h3>{{ searchQuery.trim() ? 'Products' : 'Top Picks' }}</h3>
+          <app-product-search-card [supplements]="productsToDisplay"></app-product-search-card>
+        </div>
       </div>
+      
       
   
     <!-- Icons (Outside mobile search overlay) -->

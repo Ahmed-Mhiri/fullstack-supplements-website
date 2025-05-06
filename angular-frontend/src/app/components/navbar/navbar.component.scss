@@ -29,7 +29,7 @@
     font-family: 'Poppins', sans-serif;
   
     input {
-      width: min(400px,30vw); /* Initial narrow width */
+      width: min(400px, 30vw);
       padding: 14px 48px 14px 20px;
       border-radius: 30px;
       border: 1px solid #ddd;
@@ -38,8 +38,8 @@
       font-size: 1rem;
       font-family: inherit;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      transition: 
-        width 0.4s ease, /* Smooth transition for width */
+      transition:
+        width 0.4s ease,
         box-shadow 0.3s ease,
         background-color 0.3s ease;
   
@@ -54,9 +54,9 @@
       }
   
       &:focus {
-        width: min(600px,50vw); /* Expands to 500px when focused */
+        width: min(600px, 50vw);
         background-color: #fff;
-        box-shadow: 0 0 0 5px rgba(255, 87, 34, 0.15); /* Focus ring */
+        box-shadow: 0 0 0 5px rgba(255, 87, 34, 0.15);
         outline: none;
       }
     }
@@ -74,12 +74,69 @@
   
       &:hover {
         transform: translateY(-50%) scale(1.2);
-        fill: #FF5722;
+        fill: #ff5722;
       }
   
       &:active {
         transform: translateY(-50%) scale(1);
         fill: #e64a19;
+      }
+    }
+  
+    // 🔽 Search Overlay Section
+    
+  }
+  .search-overlay {
+    width: 600px;
+    position: absolute;
+    top: 100%;
+    left: 21%; // 👈 This aligns it *just below* the search bar
+    right: 0;
+    z-index: 1000;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+   
+    padding: 24px;
+    padding-top:10px;
+    display: flex;
+    gap: 40px;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+
+    .search-overlay-content {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+
+      .popular-searches,
+      .product-results {
+        flex: 1;
+        min-width: 250px;
+
+        h3 {
+          font-size: 1.1rem;
+          margin-bottom: 12px;
+          color: #333;
+        }
+
+        ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+
+          li {
+            padding: 8px 0;
+            cursor: pointer;
+            color: #555;
+            transition: color 0.2s ease;
+
+            &:hover {
+              color: #ff5722;
+            }
+          }
+        }
       }
     }
   }
@@ -194,10 +251,6 @@
         border: none;
         padding: 0;
         cursor: pointer;
-        .icon search-icon{
-          position: absolute;
-          right: 60px;
-        }
         svg {
           width: 24px;
           height: 24px;
@@ -222,6 +275,9 @@
           border-color: #ff5722;
         }
       }
+    }
+    .product-results-mobile{
+      padding: 15px;
     }
   }
   

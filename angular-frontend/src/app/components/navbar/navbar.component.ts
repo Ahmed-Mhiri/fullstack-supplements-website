@@ -1,35 +1,95 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit,ElementRef, Renderer2, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Supplement } from '../../models/supplement.model';
+import { SupplementService } from '../../services/supplement.service';
+import { ProductSearchCardComponent } from "../product-search-card/product-search-card.component"; // adjust path
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule, ProductSearchCardComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
+  @ViewChild('searchOverlay') searchOverlay!: ElementRef;
   isSearchActive = false;
   isMobileSearchActive = false;
   mobileSearchText = '';
+  searchQuery = '';
+  allProducts: Supplement[] = [];
+  filteredProducts: Supplement[] = [];
+
+  constructor(
+    private supplementService: SupplementService,
+    private el: ElementRef,
+    private renderer: Renderer2
+  ) {}
+
+  ngOnInit(): void {
+    this.supplementService.getSupplements(100, 0).subscribe(response => {
+      this.allProducts = response.content;
+      this.filteredProducts = this.allProducts.slice(0, 3);  // Adjust as needed
+    });
+
+    // Use 'click' instead of 'mousedown'
+    this.renderer.listen('document', 'click', (event: Event) => {
+      setTimeout(() => { // <-- Wrap in setTimeout
+        const clickedInside =
+          this.searchOverlay?.nativeElement.contains(event.target) ||
+          this.el.nativeElement.contains(event.target);
+    
+        if (!clickedInside) {
+          this.isSearchActive = false;
+        }
+      }, 0); // Run AFTER Angular's click handler
+    });
+  }
+  ngAfterViewInit(): void {
+    this.renderer.listen(this.el.nativeElement, 'focusout', (event: FocusEvent) => {
+      setTimeout(() => {
+        const activeElement = document.activeElement as HTMLElement;
+        const isInside = this.el.nativeElement.contains(activeElement);
+        if (!isInside) {
+          this.isSearchActive = false;
+        }
+      }, 0);
+    });
+  }
 
   // Toggle search bar visibility (desktop)
   toggleSearch(): void {
     this.isSearchActive = !this.isSearchActive;
+    if (this.isSearchActive) {
+      this.filterProducts();
+    }
   }
 
   // Handle focus event on search bar
   onSearchFocus(): void {
     this.isSearchActive = true;
+    this.filterProducts();
   }
 
   // Handle blur event on search bar
-  onSearchBlur(): void {
+  onSearchBlur(event: FocusEvent): void {
     setTimeout(() => {
-      this.isSearchActive = false;
-    }, 200);
+      if (!this.searchOverlay.nativeElement.contains(event.relatedTarget) && !this.el.nativeElement.contains(event.relatedTarget)) {
+        this.isSearchActive = false;  // Close the search overlay if focus is lost and clicked outside
+      }
+    }, 200);  // Delay to ensure the event is handled correctly
   }
+  onSearchInputClick(event: MouseEvent): void {
+    event.stopPropagation();
+  }
+
+  // Handle the search icon click (toggle search visibility)
+  onSearchIconClick(event: MouseEvent): void {
+    event.stopPropagation();
+    this.toggleSearch();
+  }
+
 
   // Open mobile search overlay
   openMobileSearch(): void {
@@ -41,4 +101,24 @@ export class NavbarComponent {
     this.isMobileSearchActive = false;
   }
 
+  // Called when user types or selects a popular term
+  filterProducts(): void {
+    const query = this.searchQuery.toLowerCase().trim();
+    console.log('Filtering for:', query); // ✅ Debugging line
+  
+    const filtered = this.allProducts.filter(product =>
+      product.name.toLowerCase().includes(query)
+    );
+  
+    this.filteredProducts = filtered.slice(0, 3); // 👈 Limit to 3 items
+    console.log('Filtered Products:', this.filteredProducts); // ✅ Debugging line
+  }
+
+  // Apply a popular search term
+  
+  get productsToDisplay(): Supplement[] {
+    return this.filteredProducts.length > 0 || this.searchQuery.trim()
+      ? this.filteredProducts.slice(0, 3)
+      : this.allProducts.slice(0, 3);
+  }
 }

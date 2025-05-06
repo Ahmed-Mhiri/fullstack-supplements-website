@@ -1,24 +1,38 @@
-import { Component } from '@angular/core';
-
+import { Component, Input, OnInit } from '@angular/core';
+import { Supplement } from '../../models/supplement.model';
+import { SupplementService } from '../../services/supplement.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-product-search-card',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, FormsModule],
   templateUrl: './product-search-card.component.html',
   styleUrl: './product-search-card.component.scss'
 })
-export class ProductSearchCardComponent {
-  supplement = {
-    id: 1,
-    name: 'Impact Whey Protein Powder',
-    priceEuro: 15.65,
-    imageUrl: 'https://www.myprotein.com/images?url=https://static.thcdn.com/productimg/original/10530943-9515180485700898.jpg&format=webp&auto=avif&width=450&height=450&fit=crop',
-    productUrl: 'https://www.myprotein.com/p/sports-nutrition/impact-whey-protein-powder/10530943/',
-    flavor: 'Vanilla',
-    weightVolume: '500g',
-    brand: 'myprotein',
-    category: 'Protein',
-    goals: ['Muscle growth', 'Bodybuilding', 'Muscle building', 'Endurance', 'Recovery', 'Strength', 'Mass building']
-  };
+export class ProductSearchCardComponent implements OnInit  {
+  @Input() supplements: Supplement[] = []; // 👈 Accepts filtered products
+  totalPages: number = 0;
+  totalElements: number = 0;
+  currentPage: number = 0;
+
+  constructor(private supplementService: SupplementService) { }
+
+  ngOnInit(): void {
+    this.fetchSupplements();
+  }
+
+  fetchSupplements(page: number = 0): void {
+    this.supplementService.getSupplements(20, page).subscribe(response => {
+      this.supplements = response.content;
+      this.totalPages = response.totalPages;
+      this.totalElements = response.totalElements;
+      this.currentPage = page;
+    });
+  }
+
+  onPageChange(newPage: number): void {
+    this.fetchSupplements(newPage);
+  }
 
 }
