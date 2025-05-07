@@ -10,12 +10,13 @@ import { HttpClientModule } from '@angular/common/http';
 import { NavbarComponent } from "./components/navbar/navbar.component";
 import { ProductCategoryStripComponent } from "./components/product-category-strip/product-category-strip.component";
 import { ProductSearchCardComponent } from "./components/product-search-card/product-search-card.component";
+import { CartComponent } from "./components/cart/cart.component";
 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, HttpClientModule, InputTextModule, ButtonModule, MessageModule, FormsModule, SupplementCardComponent, NavbarComponent, ProductCategoryStripComponent, ProductSearchCardComponent],
+  imports: [CommonModule, RouterOutlet, HttpClientModule, InputTextModule, ButtonModule, MessageModule, FormsModule, SupplementCardComponent, NavbarComponent, ProductCategoryStripComponent, ProductSearchCardComponent, CartComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

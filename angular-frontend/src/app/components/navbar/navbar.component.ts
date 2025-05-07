@@ -3,7 +3,9 @@ import { Component, OnInit,ElementRef, Renderer2, ViewChild } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { Supplement } from '../../models/supplement.model';
 import { SupplementService } from '../../services/supplement.service';
-import { ProductSearchCardComponent } from "../product-search-card/product-search-card.component"; // adjust path
+import { ProductSearchCardComponent } from "../product-search-card/product-search-card.component"; 
+import { SharedService } from '../../services/shared.service';
+
 
 @Component({
   selector: 'app-navbar',
@@ -14,6 +16,8 @@ import { ProductSearchCardComponent } from "../product-search-card/product-searc
 })
 export class NavbarComponent implements OnInit {
   @ViewChild('searchOverlay') searchOverlay!: ElementRef;
+  cartCount = 0;
+  favoriteCount = 0;
   isSearchActive = false;
   isMobileSearchActive = false;
   mobileSearchText = '';
@@ -24,22 +28,35 @@ export class NavbarComponent implements OnInit {
   constructor(
     private supplementService: SupplementService,
     private el: ElementRef,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private sharedService: SharedService
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to cart count and favorite count updates from the SharedService
+    this.sharedService.cartItems$.subscribe(cartItems => {
+      this.cartCount = cartItems.length;
+      console.log('Cart Count Updated:', this.cartCount);  // Debugging log
+    });
+
+    // Subscribe to favorite items and update the favorite count
+    this.sharedService.favoriteItems$.subscribe(favoriteItems => {
+      this.favoriteCount = favoriteItems.length;
+      console.log('Favorite Count Updated:', this.favoriteCount);  // Debugging log
+    });
+  
     this.supplementService.getSupplements(100, 0).subscribe(response => {
       this.allProducts = response.content;
       this.filteredProducts = this.allProducts.slice(0, 3);  // Adjust as needed
     });
-
+  
     // Use 'click' instead of 'mousedown'
     this.renderer.listen('document', 'click', (event: Event) => {
       setTimeout(() => { // <-- Wrap in setTimeout
         const clickedInside =
           this.searchOverlay?.nativeElement.contains(event.target) ||
           this.el.nativeElement.contains(event.target);
-    
+  
         if (!clickedInside) {
           this.isSearchActive = false;
         }

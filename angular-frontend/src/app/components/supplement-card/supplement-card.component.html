@@ -1,13 +1,72 @@
 <div class="supplement-grid">
   <div class="supplement-card" *ngFor="let supplement of supplements">
+    
     <img [src]="supplement.imageUrl" alt="{{ supplement.name }}" class="product-image" />
-
-    <h2>{{ supplement.name }}</h2>
-
-    <div class="price-info">
-      €{{ supplement.priceEuro }}
+    <div class="heart-icon" (click)="toggleFavorite(supplement)">
+      <svg [class.filled]="supplement.isFavorite" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
+                 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09 
+                 C13.09 3.81 14.76 3 16.5 3 
+                 19.58 3 22 5.42 22 8.5 
+                 c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
     </div>
 
-    <button class="buy-button">Buy Now</button>
+    <div class="card-content">
+      
+      <h2>{{ supplement.name }}</h2>
+      <div class="price-info">€{{ supplement.priceEuro }}</div>
+
+      <button class="buy-button" (click)="onAddToCartClick(supplement)">
+        <span class="icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
+            <path d="M440-600v-120H320v-80h120v-120h80v120h120v80H520v120h-80ZM280-80q-33 0-56.5-23.5T200-160q0-33 
+            23.5-56.5T280-240q33 0 56.5 23.5T360-160q0 33-23.5 56.5T280-80Zm400 0q-33 0-56.5-23.5T600-160q0-33 
+            23.5-56.5T680-240q33 0 56.5 23.5T760-160q0 33-23.5 56.5T680-80ZM40-800v-80h131l170 
+            360h280l156-280h91L692-482q-11 20-29.5 31T622-440H324l-44 
+            80h480v80H280q-45 0-68.5-39t-1.5-79l54-98-144-304H40Z"/>
+          </svg>
+        </span>
+        <span>Add to Cart</span>
+      </button>
+    </div>
+  </div>
+  <div class="supplement-modal" *ngIf="selectedSupplement" (click)="closeModal($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()"> <!-- Prevent click event propagation inside modal -->
+      <!-- Close Button -->
+      <button class="close-button" (click)="closeModal($event)">&times;</button>
+  
+      <!-- Supplement Image -->
+      <img
+        class="modal-image"
+        [src]="selectedSupplement.imageUrl"
+        alt="{{ selectedSupplement.name }}"
+      />
+  
+      <!-- Supplement Details -->
+      <div class="modal-details">
+        <h2>{{ selectedSupplement.name }}</h2>
+        <div class="price">€{{ selectedSupplement.priceEuro }}</div>
+        <p>Flavor: {{ selectedSupplement.flavor }}</p>
+        <p>Volume: {{ selectedSupplement.weightVolume }}</p>
+        <p class="brand">Brand: {{ selectedSupplement.brand }}</p>
+  
+        <!-- Add to Cart Button -->
+        <button class="confirm-button" (click)="confirmAddToCart()">
+          <span class="icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
+              <path d="M440-600v-120H320v-80h120v-120h80v120h120v80H520v120h-80ZM280-80q-33 0-56.5-23.5T200-160q0-33 
+              23.5-56.5T280-240q33 0 56.5 23.5T360-160q0 33-23.5 56.5T280-80Zm400 0q-33 0-56.5-23.5T600-160q0-33 
+              23.5-56.5T680-240q33 0 56.5 23.5T760-160q0 33-23.5 56.5T680-80ZM40-800v-80h131l170 
+              360h280l156-280h91L692-482q-11 20-29.5 31T622-440H324l-44 
+              80h480v80H280q-45 0-68.5-39t-1.5-79l54-98-144-304H40Z"/>
+            </svg>
+          </span>
+          <span>Add to Cart</span>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
+
+
