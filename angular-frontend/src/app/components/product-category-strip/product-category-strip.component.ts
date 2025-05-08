@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Component, HostListener } from '@angular/core';
 
 @Component({
@@ -9,6 +10,8 @@ import { Component, HostListener } from '@angular/core';
   styleUrl: './product-category-strip.component.scss'
 })
 export class ProductCategoryStripComponent {
+  constructor(private router: Router) {}
+
   categories = [
     {
       title: 'Sports Nutrition',
@@ -42,21 +45,35 @@ export class ProductCategoryStripComponent {
       items: [] // Can be added later
     }
   ];
+
   isSidebarOpen = false;
+  expandedCategoryIndex: number | null = null;
 
-toggleSidebar() {
-  this.isSidebarOpen = !this.isSidebarOpen;
-}
-expandedCategoryIndex: number | null = null;
-
-toggleCategory(index: number): void {
-  this.expandedCategoryIndex = this.expandedCategoryIndex === index ? null : index;
-}
-
-@HostListener('document:keydown.escape', ['$event'])
-onEscapePress(event: KeyboardEvent): void {
-  if (this.isSidebarOpen) {
-    this.toggleSidebar();
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
-}
+
+  toggleCategory(index: number): void {
+    this.expandedCategoryIndex = this.expandedCategoryIndex === index ? null : index;
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: KeyboardEvent): void {
+    if (this.isSidebarOpen) {
+      this.toggleSidebar();
+    }
+  }
+
+  navigateToFilter(category: string, item?: string): void {
+    const page = 1;
+    const categoryLower = category.toLowerCase();
+  
+    if (category === 'Goals') {
+      this.router.navigate(['/supps', categoryLower, 'goals', item!.toLowerCase(), page]);
+    } else if (category === 'Brands') {
+      this.router.navigate(['/supps', categoryLower, 'brand', item!.toLowerCase(), page]);
+    } else {
+      this.router.navigate(['/supps', item!.toLowerCase(), page]);
+    }
+  }
 }

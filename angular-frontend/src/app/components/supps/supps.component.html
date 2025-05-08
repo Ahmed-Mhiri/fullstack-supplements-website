@@ -1,0 +1,6 @@
+<app-supplement-card [supplements]="supplements"></app-supplement-card>
+<div class="pagination-controls">
+    <button *ngIf="currentPage > 0" (click)="changePage(currentPage - 1)">Previous</button>
+    <span>Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+    <button *ngIf="currentPage < totalPages - 1" (click)="changePage(currentPage + 1)">Next</button>
+  </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Supplement } from '../../models/supplement.model';
 import { SupplementService } from '../../services/supplement.service';
 import { CommonModule } from '@angular/common';
@@ -7,11 +7,6 @@ import { SharedService } from '../../services/shared.service';
 
 
 // Interface to match the paginated response from the backend
-interface PaginatedResponse {
-  content: Supplement[];
-  totalPages: number;
-  totalElements: number;
-}
 
 @Component({
   selector: 'app-supplement-card',
@@ -20,39 +15,15 @@ interface PaginatedResponse {
   standalone: true,
   styleUrls: ['./supplement-card.component.scss']
 })
-export class SupplementCardComponent implements OnInit {
+export class SupplementCardComponent  {
   successMessageVisible = false;
   selectedSupplement: Supplement | null = null;
-  supplements: Supplement[] = [];
+  @Input() supplements: Supplement[] = [];
   supplementFavorites: Supplement[] = [];
   totalPages: number = 0;
   currentPage: number = 0;
 
   constructor(private supplementService: SupplementService, private sharedService: SharedService) {}
-
-  ngOnInit(): void {
-    this.loadSupplements(); // Load data on init
-    this.sharedService.favoriteItems$.subscribe(favorites => {
-      this.supplementFavorites = favorites;  // Update the list of favorites
-    });
-  }
-
-  loadSupplements(page: number = 0): void {
-    this.supplementService.getSupplements(20, page).subscribe({
-      next: (data: PaginatedResponse) => {
-        // Initialize isFavorite on each supplement
-        this.supplements = data.content.map(supp => ({
-          ...supp,
-          isFavorite: this.supplementFavorites.some(fav => fav.id === supp.id) // Check if it is already in favorites
-        }));
-        this.totalPages = data.totalPages;
-        this.currentPage = page;
-      },
-      error: (err) => {
-        console.error('Error fetching supplements:', err);
-      }
-    });
-  }
 
   toggleFavorite(supplement: Supplement): void {
     supplement.isFavorite = !supplement.isFavorite;

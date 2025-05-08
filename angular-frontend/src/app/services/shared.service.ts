@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of } from 'rxjs';
 import { Supplement } from '../models/supplement.model';
-
 @Injectable({
   providedIn: 'root'
 })
 export class SharedService {
+  private apiUrl = 'http://localhost:8080/api'; // Backend base URL
+
   private readonly CART_KEY = 'cart_items';
   private readonly FAVORITES_KEY = 'favorite_items';
 
@@ -15,6 +16,8 @@ export class SharedService {
   cartItems$ = this.cartItemsSubject.asObservable();
   favoriteItems$ = this.favoriteItemsSubject.asObservable();
 
+  // ------------------ Supplements API ------------------
+
   // ------------------ Cart Methods ------------------
 
   updateCartItems(items: Supplement[]): void {
@@ -22,51 +25,46 @@ export class SharedService {
       ...item,
       priceEuro: this.roundToTwoDecimalPlaces(item.priceEuro)
     }));
-
     this.cartItemsSubject.next(roundedItems);
     this.saveToStorage(this.CART_KEY, roundedItems);
   }
 
   addToCart(item: Supplement): void {
-    const currentCartItems = this.cartItemsSubject.value;
-    const itemIndex = currentCartItems.findIndex((i) => i.id === item.id);
-
+    const currentItems = this.cartItemsSubject.value;
+    const index = currentItems.findIndex(i => i.id === item.id);
     const roundedItem = { ...item, priceEuro: this.roundToTwoDecimalPlaces(item.priceEuro) };
 
-    if (itemIndex !== -1) {
+    if (index !== -1) {
       const updatedItem = {
-        ...currentCartItems[itemIndex],
-        quantity: currentCartItems[itemIndex].quantity + 1,
-        priceEuro: this.roundToTwoDecimalPlaces(currentCartItems[itemIndex].priceEuro)
+        ...currentItems[index],
+        quantity: currentItems[index].quantity + 1,
+        priceEuro: this.roundToTwoDecimalPlaces(currentItems[index].priceEuro)
       };
-      const updatedCart = [...currentCartItems];
-      updatedCart[itemIndex] = updatedItem;
+      const updatedCart = [...currentItems];
+      updatedCart[index] = updatedItem;
       this.cartItemsSubject.next(updatedCart);
       this.saveToStorage(this.CART_KEY, updatedCart);
     } else {
-      const newCart = [
-        ...currentCartItems,
-        { ...roundedItem, quantity: 1 }
-      ];
+      const newCart = [...currentItems, { ...roundedItem, quantity: 1 }];
       this.cartItemsSubject.next(newCart);
       this.saveToStorage(this.CART_KEY, newCart);
     }
   }
 
   updateItemQuantity(item: Supplement, change: number): void {
-    const currentCartItems = [...this.cartItemsSubject.value];
-    const itemIndex = currentCartItems.findIndex((cartItem) => cartItem.id === item.id);
+    const currentItems = [...this.cartItemsSubject.value];
+    const index = currentItems.findIndex(cartItem => cartItem.id === item.id);
 
-    if (itemIndex !== -1) {
-      currentCartItems[itemIndex].quantity += change;
-      currentCartItems[itemIndex].priceEuro = this.roundToTwoDecimalPlaces(currentCartItems[itemIndex].priceEuro);
+    if (index !== -1) {
+      currentItems[index].quantity += change;
+      currentItems[index].priceEuro = this.roundToTwoDecimalPlaces(currentItems[index].priceEuro);
 
-      if (currentCartItems[itemIndex].quantity <= 0) {
-        currentCartItems.splice(itemIndex, 1);
+      if (currentItems[index].quantity <= 0) {
+        currentItems.splice(index, 1);
       }
 
-      this.cartItemsSubject.next(currentCartItems);
-      this.saveToStorage(this.CART_KEY, currentCartItems);
+      this.cartItemsSubject.next(currentItems);
+      this.saveToStorage(this.CART_KEY, currentItems);
     }
   }
 
@@ -79,9 +77,11 @@ export class SharedService {
 
   addToFavorites(item: Supplement): void {
     const currentFavorites = this.favoriteItemsSubject.value;
-    const updatedFavorites = [...currentFavorites, item];
-    this.favoriteItemsSubject.next(updatedFavorites);
-    this.saveToStorage(this.FAVORITES_KEY, updatedFavorites);
+    if (!currentFavorites.some(fav => fav.id === item.id)) {
+      const updatedFavorites = [...currentFavorites, item];
+      this.favoriteItemsSubject.next(updatedFavorites);
+      this.saveToStorage(this.FAVORITES_KEY, updatedFavorites);
+    }
   }
 
   removeFromFavorites(item: Supplement): void {

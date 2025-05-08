@@ -1,13 +1,15 @@
 <div class="category-strip desktop-menu">
-    <div class="category" *ngFor="let cat of categories">
-      <div class="category-wrapper">
-        <div class="title">{{ cat.title }}</div>
-        <div class="items" *ngIf="cat.items.length > 0">
-          <div *ngFor="let item of cat.items" class="item">{{ item }}</div>
+  <div class="category" *ngFor="let cat of categories">
+    <div class="category-wrapper">
+      <div class="title" (click)="navigateToFilter(cat.title)">{{ cat.title }}</div>
+      <div class="items" *ngIf="cat.items.length > 0">
+        <div *ngFor="let item of cat.items" class="item" (click)="navigateToFilter(cat.title, item)">
+          {{ item }}
         </div>
       </div>
     </div>
   </div>
+</div>
   
   <!-- Mobile Hamburger Icon -->
   <div class="mobile-menu">
