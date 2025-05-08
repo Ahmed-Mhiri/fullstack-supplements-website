@@ -14,6 +14,8 @@ import { FormsModule } from '@angular/forms';
 export class CartComponent {
   cartItems: Supplement[] = [];
   totalAmount: number = 0;
+  isCartOpen: boolean = false;  // To track if the cart is open or not
+
 
   constructor(private sharedService: SharedService) {}
 
@@ -24,6 +26,14 @@ export class CartComponent {
       this.updateTotalAmount();
     });
   }
+  openCart(): void {
+    this.isCartOpen = true;
+  }
+
+  closeCart(): void {
+    this.isCartOpen = false;
+  }
+
 
   // Update total amount whenever cart changes
   updateTotalAmount(): void {
@@ -32,20 +42,23 @@ export class CartComponent {
 
   // Increase or decrease the quantity of an item in the cart
   updateItemQuantity(item: Supplement, change: number): void {
-    const updatedCart = [...this.cartItems];
-    const itemIndex = updatedCart.findIndex((cartItem) => cartItem.id === item.id);
+    const updatedCart = this.cartItems
+      .map(cartItem => {
+        if (cartItem.id === item.id) {
+          const newQuantity = cartItem.quantity + change;
   
-    if (itemIndex !== -1) {
-      updatedCart[itemIndex].quantity += change;
+          // If new quantity is zero or less, we return null to remove it
+          if (newQuantity <= 0) {
+            return null;
+          }
   
-      // If quantity becomes 0 or less, remove the item
-      if (updatedCart[itemIndex].quantity <= 0) {
-        updatedCart.splice(itemIndex, 1); // Remove the item from the cart
-      }
+          return { ...cartItem, quantity: newQuantity };
+        }
+        return cartItem;
+      })
+      .filter((item): item is Supplement => item !== null); // Remove nulls (deleted items)
   
-      // Update cart in SharedService
-      this.sharedService.updateCartItems(updatedCart);
-    }
+    this.sharedService.updateCartItems(updatedCart);
   }
 
   // Remove a specific item from the cart

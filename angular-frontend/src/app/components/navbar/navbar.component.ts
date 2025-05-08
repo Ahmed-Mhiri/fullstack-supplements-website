@@ -5,17 +5,19 @@ import { Supplement } from '../../models/supplement.model';
 import { SupplementService } from '../../services/supplement.service';
 import { ProductSearchCardComponent } from "../product-search-card/product-search-card.component"; 
 import { SharedService } from '../../services/shared.service';
+import { CartComponent } from '../cart/cart.component';
 
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, FormsModule, ProductSearchCardComponent],
+  imports: [CommonModule, FormsModule, ProductSearchCardComponent, CartComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent implements OnInit {
   @ViewChild('searchOverlay') searchOverlay!: ElementRef;
+  @ViewChild('cartComponent') cartComponent: CartComponent | undefined;
   cartCount = 0;
   favoriteCount = 0;
   isSearchActive = false;
@@ -138,4 +140,8 @@ export class NavbarComponent implements OnInit {
       ? this.filteredProducts.slice(0, 3)
       : this.allProducts.slice(0, 3);
   }
+  onCartIconClick(): void {
+    this.cartComponent?.openCart();
+  }
+ 
 }

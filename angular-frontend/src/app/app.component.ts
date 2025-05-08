@@ -16,7 +16,7 @@ import { CartComponent } from "./components/cart/cart.component";
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, HttpClientModule, InputTextModule, ButtonModule, MessageModule, FormsModule, SupplementCardComponent, NavbarComponent, ProductCategoryStripComponent, ProductSearchCardComponent, CartComponent],
+  imports: [CommonModule, RouterOutlet, HttpClientModule, InputTextModule, ButtonModule, MessageModule, FormsModule, SupplementCardComponent, NavbarComponent, ProductCategoryStripComponent, ProductSearchCardComponent, CartComponent ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

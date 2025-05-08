@@ -1,43 +1,53 @@
-<div class="cart-container">
-    <div class="cart-header">
-      <h3>Your Cart</h3>
-      <button class="clear-cart" (click)="clearCart()">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" width="24px" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M3 6l3 18h12l3-18H3zm16.91 2l-1.41 8H5.5l-1.41-8H19.91zM9 18h6v2H9z"/>
-        </svg>
-        Clear Cart
-      </button>
-    </div>
-  
-    <div class="cart-items" *ngIf="cartItems.length > 0; else emptyCart">
-      <div class="cart-item" *ngFor="let item of cartItems">
-        <img [src]="item.imageUrl" alt="{{ item.name }}" class="cart-item-image" />
-        <div class="cart-item-details">
-          <h4>{{ item.name }}</h4>
-          <p>Price: €{{ item.priceEuro }}</p>
-          <div class="quantity-controls">
-            <button class="quantity-btn" (click)="updateItemQuantity(item, -1)" [disabled]="item.quantity <= 1">-</button>
-            <span>{{ item.quantity }}</span>
-            <button class="quantity-btn" (click)="updateItemQuantity(item, 1)">+</button>
-          </div>
+<div class="cart-overlay" *ngIf="isCartOpen" (click)="closeCart()"></div>
+
+<!-- Cart container stops click propagation to avoid unintended closing -->
+<div
+  class="cart-container"
+  [ngClass]="{ 'open': isCartOpen }"
+  (click)="$event.stopPropagation()"
+>
+  <button class="exit-button" (click)="closeCart()">X</button>
+  <div class="cart-header">
+    <h3>Your Cart</h3>
+    <button class="clear-cart" (click)="clearCart()">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+      <span>Clear</span>
+    </button>
+  </div>
+
+  <div class="cart-items" *ngIf="cartItems.length > 0; else emptyCart">
+    <div class="cart-item" *ngFor="let item of cartItems">
+      <img [src]="item.imageUrl" alt="{{ item.name }}" class="cart-item-image" />
+      <div class="cart-item-details">
+        <h4>{{ item.name }}</h4>
+        <p class="meta"><strong>Flavor:</strong> {{ item.flavor }}</p>
+        <p class="meta"><strong>Size:</strong> {{ item.weightVolume }}</p>
+        <p class="price">€{{ item.priceEuro }} each</p>
+      
+        <div class="quantity-controls">
+          <button (click)="updateItemQuantity(item, -1)">−</button>
+          <span>{{ item.quantity }}</span>
+          <button (click)="updateItemQuantity(item, 1)">+</button>
         </div>
-        <div class="cart-item-total">
-          €{{ item.priceEuro * item.quantity }}
-        </div>
-        <button class="remove-item" (click)="removeItem(item)">Remove Item</button>
       </div>
-    </div>
-  
-    <ng-template #emptyCart>
-      <p>Your cart is empty. Add some items to get started!</p>
-    </ng-template>
-  
-    <div class="cart-footer" *ngIf="cartItems.length > 0">
-      <div class="total">
-        <h4>Total:</h4>
-        <span>€{{ totalAmount }}</span>
+      <div class="cart-item-meta">
+        <strong>€{{ item.priceEuro * item.quantity }}</strong>
+        <button class="remove-item" (click)="removeItem(item)">×</button>
       </div>
-      <button class="checkout-btn">Proceed to Checkout</button>
     </div>
   </div>
-  
+
+  <ng-template #emptyCart>
+    <div class="empty-cart-message">
+      <p>Your cart is empty. Add some items to get started!</p>
+    </div>
+  </ng-template>
+
+  <div class="cart-footer" *ngIf="cartItems.length > 0">
+    <div class="total">
+      <span>Total:</span>
+      <strong>€{{ totalAmount }}</strong>
+    </div>
+    <button class="checkout-btn">Proceed to Checkout</button>
+  </div>
+</div>

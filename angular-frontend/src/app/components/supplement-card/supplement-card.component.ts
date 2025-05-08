@@ -21,6 +21,7 @@ interface PaginatedResponse {
   styleUrls: ['./supplement-card.component.scss']
 })
 export class SupplementCardComponent implements OnInit {
+  successMessageVisible = false;
   selectedSupplement: Supplement | null = null;
   supplements: Supplement[] = [];
   supplementFavorites: Supplement[] = [];
@@ -73,6 +74,12 @@ export class SupplementCardComponent implements OnInit {
       this.sharedService.addToCart(this.selectedSupplement); // Add to cart
     }
     this.selectedSupplement = null;
+    this.successMessageVisible = true;
+
+  // Hide message after 3 seconds (optional)
+  setTimeout(() => {
+    this.successMessageVisible = false;
+  }, 3000);
   }
 
   openModal(supplement: Supplement): void {

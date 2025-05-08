@@ -1,0 +1,15 @@
+<div *ngIf="favoriteItems.length > 0; else noFavorites" class="wishlist-container">
+    <div *ngFor="let item of favoriteItems" class="wishlist-item">
+      <div class="item-info">
+        <p class="item-name">{{ item.name }}</p>
+        <p class="item-price">€{{ item.priceEuro }}</p>
+      </div>
+      <button (click)="removeFromFavorites(item)" class="remove-button">
+        Remove
+      </button>
+    </div>
+  </div>
+  
+  <ng-template #noFavorites>
+    <p class="empty-message">No items in favorites.</p>
+  </ng-template>
