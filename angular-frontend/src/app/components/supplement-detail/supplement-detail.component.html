@@ -22,7 +22,7 @@
     <!-- Price Section -->
     <div class="info-item price">
       <strong>Price:</strong>
-      <span class="price">€{{ supplement.priceEuro }}</span>
+      <span class="price">€{{ supplement.priceEuro | number: '1.2-2'  }}</span>
     </div>
 
     <div class="goals">
@@ -36,6 +36,6 @@
 </li>      </ul>
     </div>
 
-    <a [href]="supplement.productUrl" target="_blank" class="buy-button">Buy Now</a>
+    <div class="buy-button" (click)="handleBuyClick()">Buy Now</div>
   </div>
 </div>

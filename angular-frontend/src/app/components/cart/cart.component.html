@@ -22,7 +22,7 @@
         <h4>{{ item.name }}</h4>
         <p class="meta"><strong>Flavor:</strong> {{ item.flavor }}</p>
         <p class="meta"><strong>Size:</strong> {{ item.weightVolume }}</p>
-        <p class="price">€{{ item.priceEuro }} each</p>
+        <p class="price">€{{ item.priceEuro | number: '1.2-2'  }} each</p>
       
         <div class="quantity-controls">
           <button (click)="updateItemQuantity(item, -1)">−</button>
@@ -31,7 +31,7 @@
         </div>
       </div>
       <div class="cart-item-meta">
-        <strong>€{{ item.priceEuro * item.quantity }}</strong>
+        <strong>€{{ item.priceEuro * item.quantity | number: '1.2-2'  }}</strong>
         <button class="remove-item" (click)="removeItem(item)">×</button>
       </div>
     </div>
@@ -46,7 +46,7 @@
   <div class="cart-footer" *ngIf="cartItems.length > 0">
     <div class="total">
       <span>Total:</span>
-      <strong>€{{ totalAmount }}</strong>
+      <strong>€{{ totalAmount | number: '1.2-2'  }}</strong>
     </div>
     <button class="checkout-btn">Proceed to Checkout</button>
   </div>

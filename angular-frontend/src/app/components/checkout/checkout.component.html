@@ -1,0 +1,150 @@
+<form (ngSubmit)="onSubmit(buyerForm)" #buyerForm="ngForm">
+  <!-- 🛒 Buyer Info -->
+  <section class="form-section buyer-info">
+    <h3>Buyer Information</h3>
+
+    <div class="form-group">
+      <label for="company">Company (optional)</label>
+      <input type="text" id="company" name="company" [(ngModel)]="buyer.company" class="form-control" placeholder="Company (optional)">
+    </div>
+
+    <div class="form-group">
+      <label for="firstName">First Name</label>
+      <input type="text" id="firstName" name="firstName" [(ngModel)]="buyer.firstName" required class="form-control" placeholder="First Name" #firstName="ngModel">
+      <div *ngIf="firstName.invalid && firstName.touched" class="error">First Name is required.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="lastName">Last Name</label>
+      <input type="text" id="lastName" name="lastName" [(ngModel)]="buyer.lastName" required class="form-control" placeholder="Last Name" #lastName="ngModel">
+      <div *ngIf="lastName.invalid && lastName.touched" class="error">Last Name is required.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" [(ngModel)]="buyer.email" required email class="form-control" placeholder="Email" #email="ngModel">
+      <div *ngIf="email.invalid && email.touched" class="error">Please enter a valid email address.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="country">Country</label>
+      <select id="country" name="country" [(ngModel)]="buyer.country" (change)="onCountryChange()" required class="form-control" #country="ngModel">
+        <option *ngFor="let country of countries" [value]="country.name">{{ country.name }}</option>
+      </select>
+      <div *ngIf="country.invalid && country.touched" class="error">Country selection is required.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="phoneNumber">Phone Number</label>
+      <div class="phone-input">
+        <span class="phone-code">{{ selectedCountryCode }}</span>
+        <input type="tel" id="phoneNumber" name="phoneNumber" [(ngModel)]="buyer.phoneNumber" required pattern="^[0-9]{10}$" class="form-control" placeholder="Phone Number" #phoneNumber="ngModel">
+      </div>
+      <div *ngIf="phoneNumber.invalid && phoneNumber.touched" class="error">Please enter a valid phone number (10 digits).</div>
+    </div>
+  </section>
+
+  <!-- 🧾 Invoice Address -->
+  <section class="form-section invoice-address">
+    <h2>Invoice Address</h2>
+
+    <div class="form-group">
+      <label for="invoiceCountry">Country</label>
+      <select id="invoiceCountry" name="invoiceCountry" [(ngModel)]="invoice.country" required class="form-control" #invoiceCountry="ngModel">
+        <option *ngFor="let country of countries" [value]="country.name">{{ country.name }}</option>
+      </select>
+      <div *ngIf="invoiceCountry.invalid && invoiceCountry.touched" class="error">Country selection is required.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="streetAddress">Street Address</label>
+      <input type="text" id="streetAddress" name="streetAddress" [(ngModel)]="invoice.streetAddress" required class="form-control" placeholder="Street Address" #streetAddress="ngModel">
+      <div *ngIf="streetAddress.invalid && streetAddress.touched" class="error">Street Address is required.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="zip">Zip Code</label>
+      <input type="text" id="zip" name="zip" [(ngModel)]="invoice.zip" required pattern="^[0-9]{5}$" class="form-control" placeholder="Zip Code" #zip="ngModel">
+      <div *ngIf="zip.invalid && zip.touched" class="error">Zip Code is required (5 digits).</div>
+    </div>
+
+    <div class="form-group">
+      <label for="city">City</label>
+      <input type="text" id="city" name="city" [(ngModel)]="invoice.city" required class="form-control" placeholder="City" #city="ngModel">
+      <div *ngIf="city.invalid && city.touched" class="error">City is required.</div>
+    </div>
+  </section>
+
+  <!-- 💳 Payment Method -->
+  <section class="form-section payment-method">
+    <h3>Choose a Payment Method</h3>
+
+    <div class="form-group">
+      <label>Payment Method</label>
+      <div class="payment-options">
+        <label class="payment-option">
+  <input type="radio" name="paymentMethod" [(ngModel)]="payment.paymentMethod" value="Credit Card" required (change)="onPaymentMethodChange()">
+  
+  <img src="svgs/visa.svg" alt="Visa" width="40" height="24" style="vertical-align: middle; margin-right: 8px;">
+  <img src="svgs/mastercard.svg" alt="MasterCard" width="40" height="24" style="vertical-align: middle; margin-right: 8px;">
+  
+  Credit Card / Debit Card
+</label>
+
+<label class="payment-option">
+  <input type="radio" name="paymentMethod" [(ngModel)]="payment.paymentMethod" value="PayPal" (change)="onPaymentMethodChange()">
+  <img src="svgs/paypal.svg" alt="Paypal" width="40" height="24" style="vertical-align: middle; margin-right: 8px;">
+
+  PayPal
+</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- 💳 Card Details (Visible when Credit Card is selected) -->
+  <section *ngIf="payment.paymentMethod === 'Credit Card'" class="form-section card-details">
+    <h3>Card Details</h3>
+
+    <div class="form-group card-number-group">
+      <label for="cardNumber">Card Number</label>
+      <input type="text" id="cardNumber" name="cardNumber" [(ngModel)]="payment.cardNumber" required pattern="^[0-9]{16}$" class="form-control" placeholder="Card Number" #cardNumber="ngModel">
+      <div *ngIf="cardNumber.invalid && cardNumber.touched" class="error">Card number should be 16 digits.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="cardholderName">Cardholder Name</label>
+      <input type="text" id="cardholderName" name="cardholderName" [(ngModel)]="payment.cardholderName" required class="form-control" placeholder="Cardholder Name" #cardholderName="ngModel">
+      <div *ngIf="cardholderName.invalid && cardholderName.touched" class="error">Cardholder name is required.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="expirationDate">Expiration Date (MM/YY)</label>
+      <input type="text" id="expirationDate" name="expirationDate" [(ngModel)]="payment.expirationDate" required pattern="^(0[1-9]|1[0-2])\/([0-9]{2})$" class="form-control" placeholder="MM/YY" #expirationDate="ngModel">
+      <div *ngIf="expirationDate.invalid && expirationDate.touched" class="error">Please enter a valid expiration date (MM/YY).</div>
+    </div>
+
+    <div class="form-group">
+      <label for="cvv">CVV</label>
+      <input type="text" id="cvv" name="cvv" [(ngModel)]="payment.cvv" required pattern="^[0-9]{3}$" class="form-control" placeholder="CVV" #cvv="ngModel">
+      <div *ngIf="cvv.invalid && cvv.touched" class="error">CVV should be 3 digits.</div>
+    </div>
+  </section>
+
+  <!-- 💳 PayPal Details (Visible when PayPal is selected) -->
+  <section *ngIf="payment.paymentMethod === 'PayPal'" class="form-section paypal-details">
+    <h3>PayPal Information</h3>
+
+    <div class="form-group">
+      <label for="paypalEmail">PayPal Email</label>
+      <input type="email" id="paypalEmail" name="paypalEmail" [(ngModel)]="payment.paypalEmail" required class="form-control" placeholder="Your PayPal Email" #paypalEmail="ngModel">
+      <div *ngIf="paypalEmail.invalid && paypalEmail.touched" class="error">Please enter a valid PayPal email address.</div>
+    </div>
+  </section>
+
+  <!-- ✅ Submit Button -->
+  <div class="form-group submit-section">
+    <button type="submit" class="submit-btn" [disabled]="buyerForm.invalid">Complete Order</button>
+  </div>
+
+  <div class="total-price" style="font-weight: bold;">Total: €{{ totalPrice.toFixed(2) }}</div>
+</form>

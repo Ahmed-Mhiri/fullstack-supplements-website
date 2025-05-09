@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { SupplementService } from '../../services/supplement.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router'; // Import RouterModule here
+import { SharedService } from '../../services/shared.service';
 
 
 @Component({
@@ -18,30 +19,36 @@ export class SupplementDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private supplementService: SupplementService
+    private supplementService: SupplementService,
+    private sharedService: SharedService
   ) {}
 
-ngOnInit(): void {
-  const id = Number(this.route.snapshot.paramMap.get('id'));
-  
-  if (id) {
+  ngOnInit(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (!id) return;
+
     this.supplementService.getSupplementById(id).subscribe((data) => {
-      // Ensure that data.goals is a string
-      if (typeof data.goals === 'string') {
-        // Clean up the goals string and convert to an array
-        const rawGoals = (data.goals as string) // type assertion here
-          .replace(/[\[\]']+/g, '') // Remove unwanted characters
-          .split(',') // Split string by commas
-          .map(g => g.trim()); // Trim each goal
-          
-        this.supplement = { 
-          ...data, 
-          goals: rawGoals 
-        };
-      } else {
-        // If goals is already an array, just assign it
-        this.supplement = data;
-      }
+      const goals = this.parseGoals(data.goals);
+      this.supplement = { ...data, goals };
     });
   }
-}}
+
+  handleBuyClick(): void {
+    if (this.supplement) {
+      this.sharedService.addToCart(this.supplement);
+      this.sharedService.openCart();
+    }
+  }
+
+  private parseGoals(goals: string | string[]): string[] {
+    if (Array.isArray(goals)) {
+      return goals.map(g => g.trim());
+    }
+
+    return goals
+      .replace(/[\[\]']+/g, '') // Remove brackets and single quotes
+      .split(',')
+      .map(g => g.trim());
+  }
+}
+

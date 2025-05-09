@@ -2,6 +2,6 @@
   <img [src]="supplement.imageUrl" alt="{{ supplement.name }}" class="supplement-image" />
   <div class="supplement-info">
     <h2 class="supplement-name">{{ supplement.name }}</h2>
-    <p class="supplement-price">€{{ supplement.priceEuro }}</p>
+    <p class="supplement-price">€{{ supplement.priceEuro | number: '1.2-2'  }}</p>
   </div>
 </div>

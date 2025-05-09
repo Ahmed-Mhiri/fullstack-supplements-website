@@ -15,7 +15,7 @@
     <div class="card-content">
       
       <h2>{{ supplement.name }}</h2>
-      <div class="price-info">€{{ supplement.priceEuro }}</div>
+      <div class="price-info">€{{ supplement.priceEuro | number: '1.2-2' }}</div>
 
       <button class="buy-button" (click)="onAddToCartClick(supplement, $event)">
         <span class="icon-wrapper">
@@ -46,7 +46,7 @@
       <!-- Supplement Details -->
       <div class="modal-details">
         <h2>{{ selectedSupplement.name }}</h2>
-        <div class="price">€{{ selectedSupplement.priceEuro }}</div>
+        <div class="price">€{{ selectedSupplement.priceEuro | number: '1.2-2'  }}</div>
         <p>Flavor: {{ selectedSupplement.flavor }}</p>
         <p>Volume: {{ selectedSupplement.weightVolume }}</p>
         <p class="brand">Brand: {{ selectedSupplement.brand }}</p>

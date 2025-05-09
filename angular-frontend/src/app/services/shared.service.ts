@@ -1,24 +1,24 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, catchError, map, Observable, of } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of, Subject } from 'rxjs';
 import { Supplement } from '../models/supplement.model';
 @Injectable({
   providedIn: 'root'
 })
 export class SharedService {
-  private apiUrl = 'http://localhost:8080/api'; // Backend base URL
-
   private readonly CART_KEY = 'cart_items';
   private readonly FAVORITES_KEY = 'favorite_items';
 
   private cartItemsSubject = new BehaviorSubject<Supplement[]>(this.loadFromStorage(this.CART_KEY));
   private favoriteItemsSubject = new BehaviorSubject<Supplement[]>(this.loadFromStorage(this.FAVORITES_KEY));
+  private cartOpenSubject = new Subject<void>();
 
   cartItems$ = this.cartItemsSubject.asObservable();
   favoriteItems$ = this.favoriteItemsSubject.asObservable();
+  cartOpen$ = this.cartOpenSubject.asObservable();
 
-  // ------------------ Supplements API ------------------
-
-  // ------------------ Cart Methods ------------------
+  openCart(): void {
+    this.cartOpenSubject.next();
+  }
 
   updateCartItems(items: Supplement[]): void {
     const roundedItems = items.map(item => ({
@@ -30,45 +30,36 @@ export class SharedService {
   }
 
   addToCart(item: Supplement): void {
-    const currentItems = this.cartItemsSubject.value;
-    const index = currentItems.findIndex(i => i.id === item.id);
-    const roundedItem = { ...item, priceEuro: this.roundToTwoDecimalPlaces(item.priceEuro) };
+    const items = [...this.cartItemsSubject.value];
+    const index = items.findIndex(i => i.id === item.id);
 
     if (index !== -1) {
-      const updatedItem = {
-        ...currentItems[index],
-        quantity: currentItems[index].quantity + 1,
-        priceEuro: this.roundToTwoDecimalPlaces(currentItems[index].priceEuro)
+      items[index] = {
+        ...items[index],
+        quantity: items[index].quantity + 1,
+        priceEuro: this.roundToTwoDecimalPlaces(items[index].priceEuro)
       };
-      const updatedCart = [...currentItems];
-      updatedCart[index] = updatedItem;
-      this.cartItemsSubject.next(updatedCart);
-      this.saveToStorage(this.CART_KEY, updatedCart);
     } else {
-      const newCart = [...currentItems, { ...roundedItem, quantity: 1 }];
-      this.cartItemsSubject.next(newCart);
-      this.saveToStorage(this.CART_KEY, newCart);
+      items.push({ ...item, quantity: 1, priceEuro: this.roundToTwoDecimalPlaces(item.priceEuro) });
     }
+
+    this.updateCartItems(items);
   }
 
   updateItemQuantity(item: Supplement, change: number): void {
-    const currentItems = [...this.cartItemsSubject.value];
-    const index = currentItems.findIndex(cartItem => cartItem.id === item.id);
+    let items = [...this.cartItemsSubject.value];
+    const index = items.findIndex(i => i.id === item.id);
 
     if (index !== -1) {
-      currentItems[index].quantity += change;
-      currentItems[index].priceEuro = this.roundToTwoDecimalPlaces(currentItems[index].priceEuro);
-
-      if (currentItems[index].quantity <= 0) {
-        currentItems.splice(index, 1);
+      items[index].quantity += change;
+      if (items[index].quantity <= 0) {
+        items.splice(index, 1);
+      } else {
+        items[index].priceEuro = this.roundToTwoDecimalPlaces(items[index].priceEuro);
       }
-
-      this.cartItemsSubject.next(currentItems);
-      this.saveToStorage(this.CART_KEY, currentItems);
+      this.updateCartItems(items);
     }
   }
-
-  // ------------------ Favorites Methods ------------------
 
   updateFavoriteItems(items: Supplement[]): void {
     this.favoriteItemsSubject.next(items);
@@ -76,24 +67,23 @@ export class SharedService {
   }
 
   addToFavorites(item: Supplement): void {
-    const currentFavorites = this.favoriteItemsSubject.value;
-    if (!currentFavorites.some(fav => fav.id === item.id)) {
-      const updatedFavorites = [...currentFavorites, item];
-      this.favoriteItemsSubject.next(updatedFavorites);
-      this.saveToStorage(this.FAVORITES_KEY, updatedFavorites);
+    const items = [...this.favoriteItemsSubject.value];
+    if (!items.some(i => i.id === item.id)) {
+      this.updateFavoriteItems([...items, item]);
     }
   }
 
   removeFromFavorites(item: Supplement): void {
-    const updatedFavorites = this.favoriteItemsSubject.value.filter(fav => fav.id !== item.id);
-    this.favoriteItemsSubject.next(updatedFavorites);
-    this.saveToStorage(this.FAVORITES_KEY, updatedFavorites);
+    this.updateFavoriteItems(this.favoriteItemsSubject.value.filter(i => i.id !== item.id));
+  }
+    getTotalPrice(): number {
+    const items = this.cartItemsSubject.value;
+    const total = items.reduce((sum, item) => sum + item.priceEuro * item.quantity, 0);
+    return this.roundToTwoDecimalPlaces(total);
   }
 
-  // ------------------ Helpers ------------------
-
-  private roundToTwoDecimalPlaces(price: number): number {
-    return Math.round(price * 100) / 100;
+  private roundToTwoDecimalPlaces(value: number): number {
+    return Math.round(value * 100) / 100;
   }
 
   private saveToStorage(key: string, data: Supplement[]): void {
@@ -101,11 +91,11 @@ export class SharedService {
   }
 
   private loadFromStorage(key: string): Supplement[] {
-    const raw = localStorage.getItem(key);
     try {
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      console.error(`Failed to parse ${key} from localStorage`, e);
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : [];
+    } catch (err) {
+      console.error(`Error loading ${key} from localStorage`, err);
       return [];
     }
   }
