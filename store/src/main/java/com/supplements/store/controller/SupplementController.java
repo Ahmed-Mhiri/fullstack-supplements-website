@@ -1,5 +1,6 @@
 package com.supplements.store.controller;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -36,6 +37,24 @@ public class SupplementController {
             @RequestParam(required = false) String brand) {
 
         PageRequest pageRequest = PageRequest.of(page, size);
+
+        // Handling case for "Sports Nutrition"
+        if (category != null && category.equalsIgnoreCase("Sports Nutrition")) {
+            // List all the items under "Sports Nutrition"
+            List<String> categories = Arrays.asList(
+                    "Protein", "Amino Acids", "Boosters", "Carbohydrates", "Creatine",
+                    "Fitness Food", "Fitness Packages", "Minerals", "Vitamins", "Weight Gainers", "Other"
+            );
+
+            // Return supplements from all of these categories
+            return repository.findByCategoryIn(categories, pageRequest);
+        }
+        if (category != null && category.equalsIgnoreCase("Dietary Supplement")) {
+            List<String> categories = Arrays.asList(
+                    "Vitamins", "Minerals", "Fitness Packages", "Other"
+            );
+            return repository.findByCategoryIn(categories, pageRequest);
+        }
 
         if (category != null && goals != null) {
             return repository.findByCategoryContainingAndGoalsContaining(category, goals, pageRequest);

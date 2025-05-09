@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { Supplement } from '../../models/supplement.model';
 import { SharedService } from '../../services/shared.service';
 import { CommonModule } from '@angular/common';
+import { SupplementCardComponent } from '../supplement-card/supplement-card.component';
 
 @Component({
   selector: 'app-wishlist',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,SupplementCardComponent],
   templateUrl: './wishlist.component.html',
   styleUrl: './wishlist.component.scss'
 })

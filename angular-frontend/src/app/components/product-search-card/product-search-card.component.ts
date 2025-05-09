@@ -3,6 +3,7 @@ import { Supplement } from '../../models/supplement.model';
 import { SupplementService } from '../../services/supplement.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-product-search-card',
   standalone: true,
@@ -10,20 +11,22 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './product-search-card.component.html',
   styleUrl: './product-search-card.component.scss'
 })
-export class ProductSearchCardComponent implements OnInit  {
-  @Input() supplements: Supplement[] = []; // 👈 Accepts filtered products
+export class ProductSearchCardComponent implements OnInit {
+  @Input() supplements: Supplement[] = []; // Accepts filtered products externally
   totalPages: number = 0;
   totalElements: number = 0;
   currentPage: number = 0;
 
-  constructor(private supplementService: SupplementService) { }
+  readonly pageSize = 20;
+
+  constructor(private supplementService: SupplementService) {}
 
   ngOnInit(): void {
-    this.fetchSupplements();
+    this.fetchSupplements(); // Optionally, you can remove this if data is always passed via @Input()
   }
 
   fetchSupplements(page: number = 0): void {
-    this.supplementService.getSupplements(20, page).subscribe(response => {
+    this.supplementService.getSupplements(page, this.pageSize).subscribe(response => {
       this.supplements = response.content;
       this.totalPages = response.totalPages;
       this.totalElements = response.totalElements;
@@ -34,5 +37,4 @@ export class ProductSearchCardComponent implements OnInit  {
   onPageChange(newPage: number): void {
     this.fetchSupplements(newPage);
   }
-
 }

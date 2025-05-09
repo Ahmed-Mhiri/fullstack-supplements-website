@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, map, Observable, of } from 'rxjs';
 import { Supplement } from '../models/supplement.model'; // Ensure this path is correct
 import { PaginatedResponse } from '../models/paginated-response'; // Ensure this path is correct  
@@ -8,34 +8,37 @@ import { PaginatedResponse } from '../models/paginated-response'; // Ensure this
   providedIn: 'root'
 })
 export class SupplementService {
-  private apiUrl = 'http://localhost:8080/api/supplements'; // Corrected API URL for your backend
+   private apiUrl = 'http://localhost:8080/api/supplements'; // Your confirmed correct backend URL
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  // Method to get supplements with pagination and filtering
-  getSupplements(
-    page: number,
-    size: number,
-    filterType?: 'category' | 'goals' | 'brand',
-    filterValue?: string
-  ): Observable<PaginatedResponse> {
-    const params: any = { page, size };
-    if (filterType && filterValue) {
-      params[filterType] = filterValue;
-    }
-    return this.http.get<PaginatedResponse>(this.apiUrl, { params });
+  // Get supplements with pagination and multiple filters
+getSupplements(
+  page: number,
+  size: number,
+  filterType?: 'category' | 'goals' | 'brand',
+  filterValue?: string
+): Observable<PaginatedResponse> {
+  // Validate size before making the request
+  const validSize = size > 0 ? size : 21;
+
+  // Build the request parameters
+  const params: any = { page, size: validSize };
+  if (filterType && filterValue) {
+    params[filterType] = filterValue;
   }
+
+  return this.http.get<PaginatedResponse>(this.apiUrl, { params });
+}
 
   // Get all supplements without pagination
   getAllSupplements(): Observable<Supplement[]> {
-    return this.http.get<PaginatedResponse>(`${this.apiUrl}?page=0&size=1000`)
-      .pipe(
-        catchError(error => {
-          console.error('Failed to load supplements', error);
-          return of({ content: [], totalPages: 0, totalElements: 0 } as PaginatedResponse);
-        }),
-        map(response => response.content)
-      );
+    return this.http.get<Supplement[]>(`${this.apiUrl}/all`).pipe(
+      catchError(error => {
+        console.error('Failed to load all supplements', error);
+        return of([]);
+      })
+    );
   }
 
   // Method to get a single supplement by id

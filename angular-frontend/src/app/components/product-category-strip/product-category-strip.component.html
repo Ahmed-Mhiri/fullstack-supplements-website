@@ -1,8 +1,17 @@
 <div class="category-strip desktop-menu">
   <div class="category" *ngFor="let cat of categories">
     <div class="category-wrapper">
-      <div class="title" (click)="navigateToFilter(cat.title)">{{ cat.title }}</div>
-      <div class="items" *ngIf="cat.items.length > 0">
+<div
+  class="title"
+  *ngIf="cat.title !== 'Goals' && cat.title !== 'Brands'; else disabledTitle"
+  (click)="navigateToFilter(cat.title)"
+>
+  {{ cat.title }}
+</div>
+
+<ng-template #disabledTitle>
+  <div class="title disabled">{{ cat.title }}</div>
+</ng-template>      <div class="items" *ngIf="cat.items.length > 0">
         <div *ngFor="let item of cat.items" class="item" (click)="navigateToFilter(cat.title, item)">
           {{ item }}
         </div>
@@ -27,16 +36,33 @@
 
     <!-- Sidebar Content -->
     <div class="sidebar-content">
-      <div class="sidebar-category" *ngFor="let cat of categories; let i = index">
-        <div class="sidebar-title" (click)="toggleCategory(i)">
-          {{ cat.title }}
-          <span class="arrow" [class.open]="expandedCategoryIndex === i">▾</span>
-        </div>
-        <div class="sidebar-items" *ngIf="expandedCategoryIndex === i">
-          <div *ngFor="let item of cat.items" class="sidebar-item">{{ item }}</div>
-        </div>
+  <div class="sidebar-category" *ngFor="let cat of categories; let i = index">
+    <div class="sidebar-title" (click)="toggleCategory(i)">
+      {{ cat.title }}
+      <span class="arrow" [class.open]="expandedCategoryIndex === i">▾</span>
+    </div>
+
+    <div class="sidebar-items" *ngIf="expandedCategoryIndex === i">
+      <!-- "All Products" clickable under each category -->
+      <div
+        class="sidebar-item all-products"
+        *ngIf="cat.title !== 'Goals' && cat.title !== 'Brands'"
+        (click)="navigateToFilter(cat.title)"
+      >
+        All {{ cat.title }}
+      </div>
+
+      <!-- Regular items -->
+      <div
+        *ngFor="let item of cat.items"
+        class="sidebar-item"
+        (click)="navigateToFilter(cat.title, item)"
+      >
+        {{ item }}
       </div>
     </div>
+  </div>
+</div>
   </div>
 </div>
 

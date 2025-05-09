@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { Component, HostListener } from '@angular/core';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-product-category-strip',
@@ -10,7 +11,14 @@ import { Component, HostListener } from '@angular/core';
   styleUrl: './product-category-strip.component.scss'
 })
 export class ProductCategoryStripComponent {
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+  // Collapse sidebar after any navigation ends
+  this.router.events
+    .pipe(filter(event => event instanceof NavigationEnd))
+    .subscribe(() => {
+      this.expandedCategoryIndex = null;
+    });
+}
 
   categories = [
     {
@@ -39,10 +47,6 @@ export class ProductCategoryStripComponent {
       items: [
         'allstars', 'bodylab24', 'esn', 'myprotein'
       ]
-    },
-    {
-      title: 'Offers',
-      items: [] // Can be added later
     }
   ];
 
@@ -64,16 +68,28 @@ export class ProductCategoryStripComponent {
     }
   }
 
-  navigateToFilter(category: string, item?: string): void {
-    const page = 1;
-    const categoryLower = category.toLowerCase();
-  
-    if (category === 'Goals') {
-      this.router.navigate(['/supps', categoryLower, 'goals', item!.toLowerCase(), page]);
-    } else if (category === 'Brands') {
-      this.router.navigate(['/supps', categoryLower, 'brand', item!.toLowerCase(), page]);
-    } else {
-      this.router.navigate(['/supps', item!.toLowerCase(), page]);
-    }
+navigateToFilter(category: string, item?: string): void {
+  const page = 1;
+
+  let route: any[] = [];
+
+  if (category === 'Goals' && item) {
+    route = ['/supps', 'goals', item, page];
+  } else if (category === 'Brands' && item) {
+    route = ['/supps', 'brand', item, page];
+  } else if (item) {
+    route = ['/supps', item.toLowerCase(), page];
+  } else {
+    route = ['/supps', category.toLowerCase(), page];
   }
+
+  // Navigate and wait for it to complete
+  this.router.navigate(route).then(success => {
+    if (success) {
+      this.expandedCategoryIndex = null; // ✅ Collapse properly
+      this.isSidebarOpen = false;        // ✅ close sidebar
+
+    }
+  });
+}
 }

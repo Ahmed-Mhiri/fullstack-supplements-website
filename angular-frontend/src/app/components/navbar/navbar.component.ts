@@ -6,6 +6,7 @@ import { SupplementService } from '../../services/supplement.service';
 import { ProductSearchCardComponent } from "../product-search-card/product-search-card.component"; 
 import { SharedService } from '../../services/shared.service';
 import { CartComponent } from '../cart/cart.component';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -31,13 +32,14 @@ export class NavbarComponent implements OnInit {
     private supplementService: SupplementService,
     private el: ElementRef,
     private renderer: Renderer2,
-    private sharedService: SharedService
+    private sharedService: SharedService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     // Subscribe to cart count and favorite count updates from the SharedService
     this.sharedService.cartItems$.subscribe(cartItems => {
-      this.cartCount = cartItems.length;
+    this.cartCount = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
       console.log('Cart Count Updated:', this.cartCount);  // Debugging log
     });
 
@@ -47,10 +49,10 @@ export class NavbarComponent implements OnInit {
       console.log('Favorite Count Updated:', this.favoriteCount);  // Debugging log
     });
   
-    this.supplementService.getSupplements(100, 0).subscribe(response => {
-      this.allProducts = response.content;
-      this.filteredProducts = this.allProducts.slice(0, 3);  // Adjust as needed
-    });
+    this.supplementService.getAllSupplements().subscribe(products => {
+  this.allProducts = products;
+  this.filteredProducts = this.allProducts.slice(0, 3);
+});
   
     // Use 'click' instead of 'mousedown'
     this.renderer.listen('document', 'click', (event: Event) => {
@@ -143,5 +145,7 @@ export class NavbarComponent implements OnInit {
   onCartIconClick(): void {
     this.cartComponent?.openCart();
   }
- 
+ navigateToWishlist(): void {
+  this.router.navigate(['/wishlist']);
+}
 }
