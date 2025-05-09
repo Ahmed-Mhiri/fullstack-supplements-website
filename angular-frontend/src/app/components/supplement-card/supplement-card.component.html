@@ -1,8 +1,8 @@
 <div class="supplement-grid">
-  <div class="supplement-card" *ngFor="let supplement of supplements">
+  <div class="supplement-card" *ngFor="let supplement of supplements" (click)="navigateToDetail(supplement)">
     
     <img [src]="supplement.imageUrl" alt="{{ supplement.name }}" class="product-image" />
-    <div class="heart-icon" (click)="toggleFavorite(supplement)">
+    <div class="heart-icon" (click)="toggleFavorite(supplement, $event)">
       <svg [class.filled]="supplement.isFavorite" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
                  2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09 
@@ -17,7 +17,7 @@
       <h2>{{ supplement.name }}</h2>
       <div class="price-info">€{{ supplement.priceEuro }}</div>
 
-      <button class="buy-button" (click)="onAddToCartClick(supplement)">
+      <button class="buy-button" (click)="onAddToCartClick(supplement, $event)">
         <span class="icon-wrapper">
           <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor">
             <path d="M440-600v-120H320v-80h120v-120h80v120h120v80H520v120h-80ZM280-80q-33 0-56.5-23.5T200-160q0-33 

@@ -1,0 +1,41 @@
+<div *ngIf="supplement" class="supplement-detail-container">
+  <div class="image-section">
+    <img [src]="supplement.imageUrl" alt="{{ supplement.name }}" />
+  </div>
+
+  <div class="info-section">
+    <h1>{{ supplement.name }}</h1>
+    <h3>{{ supplement.brand }} - {{ supplement.category }}</h3>
+
+    <!-- Flavor Section -->
+    <div class="info-item flavor">
+      <strong>Flavor:</strong>
+      <span>{{ supplement.flavor }}</span>
+    </div>
+
+    <!-- Weight/Volume Section -->
+    <div class="info-item weight-volume">
+      <strong>Weight/Volume:</strong>
+      <span>{{ supplement.weightVolume }}</span>
+    </div>
+
+    <!-- Price Section -->
+    <div class="info-item price">
+      <strong>Price:</strong>
+      <span class="price">€{{ supplement.priceEuro }}</span>
+    </div>
+
+    <div class="goals">
+      <h4>Goals:</h4>
+      <ul>
+<li *ngFor="let goal of supplement.goals">
+  <a [routerLink]="['/supps/goals', goal, 1]" 
+     class="goal-link">
+    {{ goal }}
+  </a>
+</li>      </ul>
+    </div>
+
+    <a [href]="supplement.productUrl" target="_blank" class="buy-button">Buy Now</a>
+  </div>
+</div>

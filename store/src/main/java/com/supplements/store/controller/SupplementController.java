@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,6 +78,12 @@ public class SupplementController {
     public List<Supplement> getAllSupplements() {
         return repository.findAll();  // Returns all supplements without pagination
     }
+    @GetMapping("/{id}")
+    public Supplement getSupplementById(@PathVariable Long id) {
+        return repository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Supplement not found with id: " + id));
+}
+
 
     // POST endpoint to add a new supplement
     @PostMapping

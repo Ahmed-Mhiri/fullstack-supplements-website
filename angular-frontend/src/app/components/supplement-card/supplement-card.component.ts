@@ -4,6 +4,7 @@ import { SupplementService } from '../../services/supplement.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SharedService } from '../../services/shared.service';
+import { Router } from '@angular/router';
 
 
 // Interface to match the paginated response from the backend
@@ -23,9 +24,11 @@ export class SupplementCardComponent  {
   totalPages: number = 0;
   currentPage: number = 0;
 
-  constructor(private supplementService: SupplementService, private sharedService: SharedService) {}
+  constructor(private supplementService: SupplementService, private sharedService: SharedService,  private router: Router // Inject router
+) {}
 
-  toggleFavorite(supplement: Supplement): void {
+  toggleFavorite(supplement: Supplement,event: MouseEvent): void {
+    event.stopPropagation();
     supplement.isFavorite = !supplement.isFavorite;
     
     // Update favorite list
@@ -36,7 +39,8 @@ export class SupplementCardComponent  {
     }
   }
 
-  onAddToCartClick(supplement: Supplement): void {
+  onAddToCartClick(supplement: Supplement,event: MouseEvent): void {
+    event.stopPropagation();
     this.selectedSupplement = supplement;
   }
   
@@ -62,4 +66,7 @@ export class SupplementCardComponent  {
     event.stopPropagation(); // Prevent event from propagating to the overlay
     this.selectedSupplement = null; // Close the modal
   }
+  navigateToDetail(supplement: Supplement): void {
+  this.router.navigate(['/supplements', supplement.id]);
+}
 }

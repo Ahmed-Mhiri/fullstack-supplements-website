@@ -1,0 +1,231 @@
+.supplement-detail-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff; /* Pure white background */
+  border-radius: 16px; /* Slightly rounder corners for a softer look */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Softer, more prominent shadow */
+  overflow: hidden;
+  margin: 40px auto; /* Increased margin and centered */
+  max-width: 950px; /* Slightly larger max width */
+  transition: box-shadow 0.3s ease-in-out; /* Smooth transition for hover effect */
+
+  &:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15); /* More prominent shadow on hover */
+  }
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
+
+  /* Image Section */
+  .image-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #f8f9fa; /* Very light gray for subtle contrast */
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+
+    img {
+      max-width: 90%; /* Slightly smaller image */
+      height: auto;
+      border-radius: 12px; /* Rounder image corners */
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+      transition: transform 0.3s ease-in-out; /* Smooth zoom on hover */
+    }
+
+    img:hover {
+      transform: scale(1.05); /* Slight zoom effect on hover */
+    }
+  }
+
+  /* Info Section */
+  .info-section {
+    flex: 1.7;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    h1 {
+      font-size: 2.4rem; /* Larger title */
+      margin-bottom: 12px;
+      color: #212529; /* Darker text color */
+      font-weight: 700; /* Bold weight */
+      line-height: 1.3;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      color: #6c757d; /* Muted subtitle color */
+      margin-bottom: 25px;
+      font-weight: 400;
+    }
+
+    /* Info Item */
+    .info-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 18px; /* Increased bottom margin */
+      font-size: 1rem;
+      color: #495057;
+      line-height: 1.5;
+
+      strong {
+        font-weight: 600; /* Bolder labels */
+        width: 160px; /* Adjust width */
+        color: #343a40; /* Darker label color */
+      }
+
+      span {
+        flex-grow: 1;
+      }
+
+      &.flavor span {
+        color: #545b62;
+      }
+
+      &.price .price {
+        color: #198754;
+        font-weight: 700;
+        font-size: 1.4rem; /* Slightly larger price */
+      }
+    }
+    .goal-link {
+  background-color: #e9ecef;
+  color: #495057;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.goal-link:hover {
+  background-color: #ced4da;
+}
+
+    /* Goals Section */
+    .goals {
+      margin-top: 30px;
+
+      h4 {
+        font-size: 1.25rem;
+        color: #212529;
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+
+        li {
+          background-color: #e9ecef;
+          color: #495057;
+          padding: 10px 18px; /* More padding for better readability */
+          border-radius: 20px;
+          font-size: 1rem;
+          white-space: nowrap;
+          transition: background-color 0.3s ease-in-out;
+          cursor: pointer;
+        }
+
+        li:hover {
+          background-color: #ced4da; /* Hover effect on goals */
+        }
+      }
+    }
+
+    /* Buy Button */
+    .buy-button {
+      display: inline-block;
+      background-color: #007bff;
+      color: white;
+      padding: 16px 30px;
+      border-radius: 12px; /* More rounded button */
+      text-decoration: none;
+      font-weight: 600;
+      transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+      text-align: center;
+      margin-top: 35px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 1.1rem;
+    }
+
+    .buy-button:hover {
+      background-color: #0056b3;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+    }
+
+    .buy-button:active {
+      background-color: #004494;
+      box-shadow: none;
+    }
+  }
+
+  /* Mobile Responsiveness */
+  @media (max-width: 767px) {
+    margin: 20px;
+
+    .image-section {
+      padding: 20px;
+
+      img {
+        max-width: 100%;
+        transition: transform 0.2s ease-in-out;
+      }
+
+      img:hover {
+        transform: scale(1.02); /* Subtle zoom on mobile */
+      }
+    }
+
+    .info-section {
+      padding: 20px;
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h3 {
+        font-size: 1.15rem;
+        margin-bottom: 18px;
+      }
+
+      .info-item {
+        margin-bottom: 14px;
+        font-size: 0.95rem;
+
+      }
+
+      .goals {
+        margin-top: 25px;
+
+        ul {
+          display: flex;
+          gap: 8px;
+
+          li {
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            width: fit-content;
+          }
+        }
+      }
+
+      .buy-button {
+        padding: 14px 22px;
+        font-size: 1rem;
+        margin-top: 28px;
+      }
+    }
+  }
+}
