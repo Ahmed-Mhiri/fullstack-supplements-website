@@ -90,56 +90,62 @@
     width: 600px;
     position: absolute;
     top: 100%;
-    left: 21%; // 👈 This aligns it *just below* the search bar
+    left: 21%; /* Aligns it just below the search bar */
     right: 0;
     z-index: 1000;
     background: #ffffff;
     border-radius: 12px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-   
     padding: 24px;
-    padding-top:10px;
+    padding-top: 10px;
     display: flex;
     gap: 40px;
     transition: opacity 0.3s ease, transform 0.3s ease;
 
     .search-overlay-content {
-      display: flex;
-      flex-direction: row;
-      width: 100%;
-      justify-content: space-between;
-      flex-wrap: nowrap;
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: nowrap;
 
-      .popular-searches,
-      .product-results {
-        flex: 1;
-        min-width: 250px;
+        .popular-searches,
+        .product-results {
+            flex: 1;
+            min-width: 250px;
 
-        h3 {
-          font-size: 1.1rem;
-          margin-bottom: 12px;
-          color: #333;
-        }
-
-        ul {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-
-          li {
-            padding: 8px 0;
-            cursor: pointer;
-            color: #555;
-            transition: color 0.2s ease;
-
-            &:hover {
-              color: #ff5722;
+            h3 {
+                font-size: 1.1rem;
+                margin-bottom: 12px;
+                color: #333;
             }
-          }
+
+            ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+
+                li {
+                    padding: 8px 0;
+                    cursor: pointer;
+                    color: #555;
+                    transition: color 0.2s ease;
+
+                    &:hover {
+                        color: #ff5722;
+                    }
+                }
+            }
         }
-      }
     }
-  }
+}
+
+/* Media Query for small screens */
+@media (max-width: 768px) {
+    .search-overlay {
+        display: none; /* Hide on small screens */
+    }
+}
   
   
   

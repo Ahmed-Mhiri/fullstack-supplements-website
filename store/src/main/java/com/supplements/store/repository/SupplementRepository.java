@@ -3,6 +3,8 @@ package com.supplements.store.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.supplements.store.model.Supplement;
 
@@ -19,4 +21,9 @@ public interface SupplementRepository extends JpaRepository<Supplement, Long> {
 
     // New method to search by a list of categories
     Page<Supplement> findByCategoryIn(List<String> categories, Pageable pageable);
+
+    // New search method across multiple fields (name, category, brand, goals)
+    @Query("SELECT s FROM Supplement s WHERE " +
+            "LOWER(s.name) LIKE LOWER(CONCAT('%', :query, '%')) ")
+    Page<Supplement> searchByQuery(@Param("query") String query, Pageable pageable);
 }

@@ -27,28 +27,32 @@ export class SuppsComponent implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void {
+ ngOnInit(): void {
   this.route.paramMap.subscribe(params => {
-    // Extract the category or filter type and filter value
     const categoryOrFilter = params.get('category') || params.get('filterType');
     const filterValue = params.get('filterValue');
     const pageParam = parseInt(params.get('page') || '1', 10) - 1;
 
-    // Correctly set the current page
     this.currentPage = isNaN(pageParam) ? 0 : pageParam;
 
-    // Ensure supplementsPerPage is valid (greater than 0)
-    const safeSize = this.supplementsPerPage > 0 ? this.supplementsPerPage : 21;
+    // Check if the URL has a search query
+    const searchQuery = params.get('filterValue'); // Search query will be passed as filterValue
 
-    // Conditional logic based on filter type and category
-    if (params.get('filterType') && filterValue) {
-      this.loadFilteredSupplements(categoryOrFilter as FilterType, filterValue, safeSize);
+    if (searchQuery) {
+      this.loadSupplementsBySearchQuery(searchQuery);
+    } else if (categoryOrFilter && filterValue) {
+      this.loadFilteredSupplements(categoryOrFilter as FilterType, filterValue, 21); // Load filtered supplements
     } else if (categoryOrFilter) {
-      this.loadSupplementsByCategory(categoryOrFilter, safeSize);
+      this.loadSupplementsByCategory(categoryOrFilter, 21); // Load supplements by category
     } else {
-      // Default fallback to 'protein'
-      this.loadSupplementsByCategory('protein', safeSize);
+      this.loadSupplementsByCategory('protein', 21); // Default fallback to 'protein'
     }
+  });
+}
+loadSupplementsBySearchQuery(query: string): void {
+  this.supplementService.getSupplementsBySearchQuery(query, this.currentPage, 21).subscribe((response: PaginatedResponse) => {
+    this.supplements = response.content;
+    this.totalPages = response.totalPages;
   });
 }
 

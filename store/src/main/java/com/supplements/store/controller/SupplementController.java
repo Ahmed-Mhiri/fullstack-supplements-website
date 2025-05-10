@@ -72,18 +72,31 @@ public class SupplementController {
         }
     }
 
+    // GET endpoint for searching supplements by query string
+    @GetMapping("/search")
+    public Page<Supplement> searchSupplements(
+            @RequestParam String query,  // The search query
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        // Perform search on multiple fields such as name, category, goals, and brand
+        return repository.searchByQuery(query, pageRequest);
+    }
 
     // New GET endpoint to fetch all supplements without pagination
     @GetMapping("/all")
     public List<Supplement> getAllSupplements() {
         return repository.findAll();  // Returns all supplements without pagination
     }
+
+    // GET endpoint to fetch a supplement by its ID
     @GetMapping("/{id}")
     public Supplement getSupplementById(@PathVariable Long id) {
         return repository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Supplement not found with id: " + id));
-}
-
+                .orElseThrow(() -> new RuntimeException("Supplement not found with id: " + id));
+    }
 
     // POST endpoint to add a new supplement
     @PostMapping

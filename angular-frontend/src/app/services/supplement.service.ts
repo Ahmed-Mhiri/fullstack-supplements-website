@@ -60,4 +60,13 @@ getSupplements(
   deleteSupplement(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+  getSupplementsBySearchQuery(query: string, page: number, size: number): Observable<PaginatedResponse> {
+  return this.http.get<PaginatedResponse>(`${this.apiUrl}/search`, {
+    params: new HttpParams()
+      .set('query', query)
+      .set('page', page.toString())
+      .set('size', size.toString())
+  });
+
+}
 }

@@ -86,10 +86,28 @@ export class NavbarComponent implements OnInit {
     event.stopPropagation();
   }
 
-  onSearchIconClick(event: MouseEvent): void {
-    event.stopPropagation();
-    this.toggleSearch();
+onSearchIconClick(event: Event): void {
+  event.stopPropagation();  // Stop event propagation
+
+  // Toggle the search visibility
+  this.toggleSearch();
+
+  // Close the mobile search overlay if it's open
+  this.closeMobileSearch();
+
+  // Check if it's a keyboard event (for "Enter" key press)
+  if (event instanceof KeyboardEvent && event.key === "Enter") {
+    if (this.searchQuery.trim()) {
+      // If there is a search query, navigate to the search page with the query
+      this.router.navigate(['/supps', 'search', this.searchQuery, 1]);
+    }
   }
+
+  // If it's a mouse click and searchQuery is not empty, proceed with navigation
+  if (event instanceof MouseEvent && this.searchQuery.trim()) {
+    this.router.navigate(['/supps', 'search', this.searchQuery, 1]);
+  }
+}
 
   openMobileSearch(): void {
     this.isMobileSearchActive = true;

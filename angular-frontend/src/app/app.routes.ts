@@ -13,5 +13,6 @@ export const routes: Routes = [
     path: 'supplements/:id',
     component: SupplementDetailComponent
   },
-  { path: 'checkout', component: CheckoutComponent }
+  { path: 'checkout', component: CheckoutComponent },
+  { path: 'supps/search/:filterValue/:page', component: SuppsComponent }
 ];
