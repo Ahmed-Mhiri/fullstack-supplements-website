@@ -1,4 +1,4 @@
-<div *ngFor="let supplement of supplements" class="supplement-card">
+<div *ngFor="let supplement of supplements" class="supplement-card" (click)="onCardClick($event, supplement)">
   <img [src]="supplement.imageUrl" alt="{{ supplement.name }}" class="supplement-image" />
   <div class="supplement-info">
     <h2 class="supplement-name">{{ supplement.name }}</h2>

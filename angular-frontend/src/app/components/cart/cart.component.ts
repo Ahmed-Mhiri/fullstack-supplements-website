@@ -3,6 +3,7 @@ import { Supplement } from '../../models/supplement.model';
 import { SharedService } from '../../services/shared.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-cart',
@@ -16,7 +17,7 @@ export class CartComponent {
   totalAmount = 0;
   isCartOpen = false;
 
-  constructor(private sharedService: SharedService) {}
+  constructor(private sharedService: SharedService, private router : Router) {}
 
   ngOnInit(): void {
     this.sharedService.cartItems$.subscribe(items => {
@@ -54,5 +55,9 @@ export class CartComponent {
 
   clearCart(): void {
     this.sharedService.updateCartItems([]);
+  }
+   goToCheckout(): void {
+    this.closeCart(); // Close the cart overlay
+    this.router.navigate(['/checkout']); // Navigate to the checkout route
   }
 }

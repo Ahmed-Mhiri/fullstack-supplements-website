@@ -48,6 +48,6 @@
       <span>Total:</span>
       <strong>€{{ totalAmount | number: '1.2-2'  }}</strong>
     </div>
-    <button class="checkout-btn">Proceed to Checkout</button>
+    <button class="checkout-btn" (click)="goToCheckout()">Proceed to Checkout</button>
   </div>
 </div>

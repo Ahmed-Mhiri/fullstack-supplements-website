@@ -24,12 +24,16 @@ export class SupplementDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id) return;
+    // Subscribe to route parameter changes (id)
+    this.route.paramMap.subscribe(params => {
+      const id = Number(params.get('id'));
+      if (!id) return;
 
-    this.supplementService.getSupplementById(id).subscribe((data) => {
-      const goals = this.parseGoals(data.goals);
-      this.supplement = { ...data, goals };
+      // Fetch new supplement data when the id changes
+      this.supplementService.getSupplementById(id).subscribe(data => {
+        const goals = this.parseGoals(data.goals);
+        this.supplement = { ...data, goals };
+      });
     });
   }
 

@@ -23,13 +23,16 @@
       </svg>    
     </div>
     
-    <!-- ✅ Search Overlay Section -->
-    <div class="search-overlay" *ngIf="isSearchActive">
+    <!-- ✅ Search Overlay Section *ngIf="isSearchActive"-->
+    <div class="search-overlay" *ngIf="isSearchActive" >
       <div class="search-overlay-content">
         <!-- Filtered Products -->
         <div class="product-results">
           <h3>{{ searchQuery.trim() ? 'Products' : 'Top Picks' }}</h3>
-          <app-product-search-card [supplements]="productsToDisplay"></app-product-search-card>
+<app-product-search-card 
+  [supplements]="productsToDisplay"
+  (productClick)="onProductCardClicked($event)">
+</app-product-search-card>
         </div>
       </div>
     </div>
@@ -64,7 +67,10 @@
         </div>
         <div class="product-results-mobile">
           <h3>{{ searchQuery.trim() ? 'Products' : 'Top Picks' }}</h3>
-          <app-product-search-card [supplements]="productsToDisplay"></app-product-search-card>
+          <app-product-search-card 
+      [supplements]="productsToDisplay"
+      (productClick)="onProductCardClicked($event)">
+    </app-product-search-card>
         </div>
       </div>
       

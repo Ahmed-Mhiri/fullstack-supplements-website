@@ -3,11 +3,12 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SharedService } from '../../services/shared.service';
 import { Supplement } from '../../models/supplement.model';
+import { CartResumeComponent } from "../cart-resume/cart-resume.component";
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [FormsModule,CommonModule],
+  imports: [FormsModule, CommonModule, CartResumeComponent],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.scss'
 })
@@ -45,7 +46,7 @@ export class CheckoutComponent {
     { name: 'Spain' },
   ];
 
-  selectedCountryCode = '+1'; // default country code, change it based on your country's requirements
+  selectedCountryCode = '+49'; // default country code, change it based on your country's requirements
   totalPrice: number = 0; // Initialize with 0, will be updated dynamically
 
   constructor(private sharedService: SharedService) {}

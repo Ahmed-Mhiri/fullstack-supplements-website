@@ -1,0 +1,35 @@
+<div
+  class="cart-resume-wrapper"
+  *ngIf="cartItems.length > 0; else emptyCart"
+  [ngClass]="{ 'scrolled': scrolledDown }"
+>  <h3 class="resume-title">Order Summary</h3>
+
+  <!-- Scrollable items container -->
+  <div class="cart-items-scroll">
+    <div class="cart-item" *ngFor="let item of cartItems">
+      <img [src]="item.imageUrl" alt="{{ item.name }}" class="cart-item-image" />
+
+      <div class="cart-item-details">
+        <h4>{{ item.name }}</h4>
+        <p class="meta"><strong>Flavor:</strong> {{ item.flavor }}</p>
+        <p class="meta"><strong>Size:</strong> {{ item.weightVolume }}</p>
+        <p class="meta"><strong>Quantity:</strong> {{ item.quantity }}</p>
+      </div>
+
+      <div class="cart-item-meta">
+        <strong>€{{ item.priceEuro * item.quantity | number: '1.2-2' }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="resume-total">
+    <span>Total:</span>
+    <strong>€{{ totalAmount | number: '1.2-2' }}</strong>
+  </div>
+</div>
+
+<ng-template #emptyCart>
+  <div class="empty-cart-message">
+    <p>Your cart is empty. Start shopping to see items here.</p>
+  </div>
+</ng-template>
