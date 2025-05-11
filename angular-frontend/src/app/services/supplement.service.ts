@@ -16,19 +16,43 @@ export class SupplementService {
 getSupplements(
   page: number,
   size: number,
-  filterType?: 'category' | 'goals' | 'brand',
-  filterValue?: string
+  filterType: 'category' | 'goals' | 'brand',
+  filterValue: string
 ): Observable<PaginatedResponse> {
   // Validate size before making the request
-  const validSize = size > 0 ? size : 21;
+  const validSize = size > 0 ? size : 20;  // Default size is 20 if invalid
 
   // Build the request parameters
   const params: any = { page, size: validSize };
+
+  // Add the filter parameters based on the filterType and filterValue
   if (filterType && filterValue) {
-    params[filterType] = filterValue;
+    if (filterType === 'category') {
+      params['category'] = filterValue;  // No encoding applied
+    } else if (filterType === 'goals') {
+      params['goals'] = filterValue;  // No encoding applied
+    } else if (filterType === 'brand') {
+      params['brand'] = filterValue;  // No encoding applied
+    }
   }
 
+  // Make the HTTP GET request with the dynamic params
   return this.http.get<PaginatedResponse>(this.apiUrl, { params });
+}
+
+  // Get supplements by search query (for name search)
+  getSupplementsBySearchQuery(query: string, page: number, size: number): Observable<PaginatedResponse> {
+  return this.http.get<PaginatedResponse>(`${this.apiUrl}/search`, {
+    params: new HttpParams()
+      .set('query', query)   // Add the search query
+      .set('page', page.toString())  // Add the page number
+      .set('size', size.toString())  // Add the page size
+  }).pipe(
+    catchError(error => {
+      console.error('Failed to search supplements', error);  // Log the error for debugging
+      return of({ content: [], totalElements: 0, totalPages: 0 });  // Return an empty paginated response
+    })
+  );
 }
 
   // Get all supplements without pagination
@@ -36,15 +60,21 @@ getSupplements(
     return this.http.get<Supplement[]>(`${this.apiUrl}/all`).pipe(
       catchError(error => {
         console.error('Failed to load all supplements', error);
-        return of([]);
+        return of([]);  // Return an empty array if the request fails
       })
     );
   }
 
-  // Method to get a single supplement by id
-  getSupplementById(id: number): Observable<Supplement> {
-    return this.http.get<Supplement>(`${this.apiUrl}/${id}`);
-  }
+  // Get a single supplement by its id
+  getSupplementById(id: number): Observable<Supplement | null> {
+  return this.http.get<Supplement>(`${this.apiUrl}/${id}`).pipe(
+    catchError(error => {
+      console.error('Failed to load supplement by ID', error);
+      return of(null);  // Return null if the supplement is not found
+    })
+  );
+}
+
 
   // Method to add a new supplement
   addSupplement(supplement: Supplement): Observable<Supplement> {
@@ -60,13 +90,5 @@ getSupplements(
   deleteSupplement(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
-  getSupplementsBySearchQuery(query: string, page: number, size: number): Observable<PaginatedResponse> {
-  return this.http.get<PaginatedResponse>(`${this.apiUrl}/search`, {
-    params: new HttpParams()
-      .set('query', query)
-      .set('page', page.toString())
-      .set('size', size.toString())
-  });
 
-}
 }

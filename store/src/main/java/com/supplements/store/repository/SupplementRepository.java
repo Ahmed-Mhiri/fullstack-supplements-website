@@ -10,20 +10,48 @@ import com.supplements.store.model.Supplement;
 
 import java.util.List;
 
+
 public interface SupplementRepository extends JpaRepository<Supplement, Long> {
 
-    Page<Supplement> findByCategoryContaining(String category, Pageable pageable);
-    Page<Supplement> findByBrandContaining(String brand, Pageable pageable);
-    Page<Supplement> findByGoalsContaining(String goals, Pageable pageable);
-    Page<Supplement> findByCategoryContainingAndBrandContaining(String category, String brand, Pageable pageable);
-    Page<Supplement> findByCategoryContainingAndGoalsContaining(String category, String goals, Pageable pageable);
-    Page<Supplement> findByCategoryContainingAndGoalsContainingAndBrandContaining(String category, String goals, String brand, Pageable pageable);
-
-    // New method to search by a list of categories
+    // Grouped categories
     Page<Supplement> findByCategoryIn(List<String> categories, Pageable pageable);
 
-    // New search method across multiple fields (name, category, brand, goals)
+    // Search by name
+    Page<Supplement> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
+    // Case-insensitive filtering by single field
+    @Query("SELECT s FROM Supplement s WHERE LOWER(s.category) LIKE LOWER(CONCAT('%', :category, '%'))")
+    Page<Supplement> findByCategoryContainingIgnoreCase(@Param("category") String category, Pageable pageable);
+
+    @Query("SELECT s FROM Supplement s WHERE LOWER(s.brand) LIKE LOWER(CONCAT('%', :brand, '%'))")
+    Page<Supplement> findByBrandContainingIgnoreCase(@Param("brand") String brand, Pageable pageable);
+
+    @Query("SELECT s FROM Supplement s WHERE LOWER(s.goals) LIKE LOWER(CONCAT('%', :goals, '%'))")
+    Page<Supplement> findByGoalsContainingIgnoreCase(@Param("goals") String goals, Pageable pageable);
+
+    // category + brand
     @Query("SELECT s FROM Supplement s WHERE " +
-            "LOWER(s.name) LIKE LOWER(CONCAT('%', :query, '%')) ")
-    Page<Supplement> searchByQuery(@Param("query") String query, Pageable pageable);
+            "LOWER(s.category) LIKE LOWER(CONCAT('%', :category, '%')) AND " +
+            "LOWER(s.brand) LIKE LOWER(CONCAT('%', :brand, '%'))")
+    Page<Supplement> findByCategoryAndBrandIgnoreCase(@Param("category") String category,
+                                                      @Param("brand") String brand,
+                                                      Pageable pageable);
+
+    // category + goals
+    @Query("SELECT s FROM Supplement s WHERE " +
+            "LOWER(s.category) LIKE LOWER(CONCAT('%', :category, '%')) AND " +
+            "LOWER(s.goals) LIKE LOWER(CONCAT('%', :goals, '%'))")
+    Page<Supplement> findByCategoryAndGoal(@Param("category") String category,
+                                           @Param("goals") String goals,
+                                           Pageable pageable);
+
+    // category + brand + goals
+    @Query("SELECT s FROM Supplement s WHERE " +
+            "LOWER(s.category) LIKE LOWER(CONCAT('%', :category, '%')) AND " +
+            "LOWER(s.brand) LIKE LOWER(CONCAT('%', :brand, '%')) AND " +
+            "LOWER(s.goals) LIKE LOWER(CONCAT('%', :goals, '%'))")
+    Page<Supplement> findByCategoryAndBrandAndGoal(@Param("category") String category,
+                                                   @Param("brand") String brand,
+                                                   @Param("goals") String goals,
+                                                   Pageable pageable);
 }

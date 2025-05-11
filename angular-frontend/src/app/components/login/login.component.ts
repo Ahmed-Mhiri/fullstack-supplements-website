@@ -1,0 +1,33 @@
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [FormsModule],
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.scss'
+})
+export class LoginComponent {
+  email: string = '';
+  password: string = '';
+  constructor(private router: Router) {}
+
+  onSubmit(): void {
+    console.log('Email:', this.email);
+    console.log('Password:', this.password);
+  }
+
+  onForgotPassword(event: Event): void {
+    event.preventDefault();
+    console.log('Redirect to Forgot Password page');
+  }
+
+  onSignUp(event: Event): void {
+  event.preventDefault();
+  this.router.navigate(['/signup']);
+}
+
+}

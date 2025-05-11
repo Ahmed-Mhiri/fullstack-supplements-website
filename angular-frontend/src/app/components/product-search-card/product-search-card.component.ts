@@ -10,11 +10,13 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './product-search-card.component.html',
-  styleUrl: './product-search-card.component.scss'
+  styleUrls: ['./product-search-card.component.scss']
 })
 export class ProductSearchCardComponent implements OnInit {
   @Input() supplements: Supplement[] = [];
   @Output() productClick: EventEmitter<Supplement> = new EventEmitter<Supplement>();
+  @Input() searchQuery: string = '';  // Input for the search query (new addition)
+  
   totalPages: number = 0;
   totalElements: number = 0;
   currentPage: number = 0;
@@ -24,20 +26,35 @@ export class ProductSearchCardComponent implements OnInit {
   constructor(private supplementService: SupplementService, private router: Router) {}
 
   ngOnInit(): void {
-    this.fetchSupplements(); // Optionally, you can remove this if data is always passed via @Input()
+    // Fetch supplements when component initializes (based on search query)
+    this.fetchSupplements();
   }
 
-  fetchSupplements(page: number = 0): void {
-    this.supplementService.getSupplements(page, this.pageSize).subscribe(response => {
-      this.supplements = response.content;
-      this.totalPages = response.totalPages;
-      this.totalElements = response.totalElements;
-      this.currentPage = page;
-    });
+  // Modify fetchSupplements to use the search query if provided
+  fetchSupplements(page: number = this.currentPage): void {
+  if (this.searchQuery) {
+    // Use the search query and pass dummy values for filterType and filterValue
+    this.supplementService.getSupplementsBySearchQuery(this.searchQuery, page, this.pageSize)
+      .subscribe(response => {
+        this.supplements = response.content;
+        this.totalPages = response.totalPages;
+        this.totalElements = response.totalElements;
+        this.currentPage = page;
+      });
+  } else {
+    // If no search query, use a default filter (for example, 'category' and 'all')
+    this.supplementService.getSupplements(page, this.pageSize, 'category', 'all')
+      .subscribe(response => {
+        this.supplements = response.content;
+        this.totalPages = response.totalPages;
+        this.totalElements = response.totalElements;
+        this.currentPage = page;
+      });
   }
+}
 
   onPageChange(newPage: number): void {
-    this.fetchSupplements(newPage);
+    this.fetchSupplements(newPage);  // Call fetchSupplements when the page changes
   }
 
   onCardClick(event: Event, product: Supplement): void {

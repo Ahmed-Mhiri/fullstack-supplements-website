@@ -28,7 +28,6 @@ public class SupplementController {
         this.repository = repository;
     }
 
-    // GET endpoint with optional filters for category, goals, and brand, plus pagination
     @GetMapping
     public Page<Supplement> getSupplements(
             @RequestParam(defaultValue = "0") int page,
@@ -39,68 +38,65 @@ public class SupplementController {
 
         PageRequest pageRequest = PageRequest.of(page, size);
 
-        // Handling case for "Sports Nutrition"
-        if (category != null && category.equalsIgnoreCase("Sports Nutrition")) {
-            // List all the items under "Sports Nutrition"
-            List<String> categories = Arrays.asList(
-                    "Protein", "Amino Acids", "Boosters", "Carbohydrates", "Creatine",
-                    "Fitness Food", "Fitness Packages", "Minerals", "Vitamins", "Weight Gainers", "Other"
-            );
-
-            // Return supplements from all of these categories
-            return repository.findByCategoryIn(categories, pageRequest);
-        }
-        if (category != null && category.equalsIgnoreCase("Dietary Supplement")) {
-            List<String> categories = Arrays.asList(
-                    "Vitamins", "Minerals", "Fitness Packages", "Other"
-            );
+        // Handle grouped categories
+        if ("Sports Nutrition".equalsIgnoreCase(category)) {
+            List<String> categories = Arrays.asList("Protein", "Amino Acids", "Boosters", "Carbohydrates", "Creatine",
+                    "Fitness Food", "Fitness Packages", "Minerals", "Vitamins", "Weight Gainers", "Other");
             return repository.findByCategoryIn(categories, pageRequest);
         }
 
-        if (category != null && goals != null) {
-            return repository.findByCategoryContainingAndGoalsContaining(category, goals, pageRequest);
-        } else if (category != null && brand != null) {
-            return repository.findByCategoryContainingAndBrandContaining(category, brand, pageRequest);
+        if ("Dietary Supplement".equalsIgnoreCase(category)) {
+            List<String> categories = Arrays.asList("Vitamins", "Minerals", "Fitness Packages", "Other");
+            return repository.findByCategoryIn(categories, pageRequest);
+        }
+
+        // Filter logic combinations
+        if (category != null && brand != null && goals != null) {
+            return repository.findByCategoryAndBrandAndGoal(category, brand, goals, pageRequest);
+        } else if (category != null && goals != null) {
+            return repository.findByCategoryAndGoal(category, goals, pageRequest);
         } else if (goals != null) {
-            return repository.findByGoalsContaining(goals, pageRequest);
-        } else if (brand != null) {
-            return repository.findByBrandContaining(brand, pageRequest);
+            return repository.findByGoalsContainingIgnoreCase(goals, pageRequest);
+        } else if (category != null && brand != null) {
+            return repository.findByCategoryAndBrandIgnoreCase(category, brand, pageRequest);
+
+// If only category is provided
         } else if (category != null) {
-            return repository.findByCategoryContaining(category, pageRequest);
-        } else {
-            return repository.findAll(pageRequest);
+            return repository.findByCategoryContainingIgnoreCase(category, pageRequest);
+
+// If only brand is provided
+        } else if (brand != null) {
+            return repository.findByBrandContainingIgnoreCase(brand, pageRequest);
         }
+
+        // Default: return all
+        return repository.findAll(pageRequest);
     }
 
-    // GET endpoint for searching supplements by query string
     @GetMapping("/search")
     public Page<Supplement> searchSupplements(
-            @RequestParam String query,  // The search query
+            @RequestParam String query,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         PageRequest pageRequest = PageRequest.of(page, size);
-
-        // Perform search on multiple fields such as name, category, goals, and brand
-        return repository.searchByQuery(query, pageRequest);
+        return repository.findByNameContainingIgnoreCase(query, pageRequest);
     }
 
-    // New GET endpoint to fetch all supplements without pagination
     @GetMapping("/all")
     public List<Supplement> getAllSupplements() {
-        return repository.findAll();  // Returns all supplements without pagination
+        return repository.findAll();
     }
 
-    // GET endpoint to fetch a supplement by its ID
     @GetMapping("/{id}")
     public Supplement getSupplementById(@PathVariable Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Supplement not found with id: " + id));
     }
 
-    // POST endpoint to add a new supplement
     @PostMapping
     public Supplement create(@RequestBody Supplement supplement) {
         return repository.save(supplement);
     }
 }
+

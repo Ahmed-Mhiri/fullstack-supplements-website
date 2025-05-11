@@ -17,6 +17,10 @@ import { Router } from '@angular/router';
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent implements OnInit {
+goToProfile() {
+    this.router.navigate(['/login']); // or open a dropdown instead
+
+}
 @ViewChild('searchOverlay') searchOverlay!: ElementRef;
   @ViewChild('cartComponent') cartComponent: CartComponent | undefined;
   cartCount = 0;

@@ -1,0 +1,27 @@
+<div class="login-container">
+  <div class="login-form">
+    <h2>Welcome Back</h2>
+
+    <form (submit)="onSubmit()" autocomplete="off">
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" [(ngModel)]="email" name="email" required />
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" [(ngModel)]="password" name="password" required />
+      </div>
+
+      <div class="form-links">
+        <a href="#" (click)="onForgotPassword($event)">Forgot Password?</a>
+      </div>
+
+      <button type="submit" class="login-btn">Log In</button>
+
+      <div class="signup-link">
+        Don't have an account? <a href="#" (click)="onSignUp($event)">Sign Up</a>
+      </div>
+    </form>
+  </div>
+</div>
