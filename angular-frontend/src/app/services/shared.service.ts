@@ -99,4 +99,8 @@ export class SharedService {
       return [];
     }
   }
+  clearCart(): void {
+  this.cartItemsSubject.next([]); // Clear observable
+  this.saveToStorage(this.CART_KEY, []); // Clear localStorage
+}
 }

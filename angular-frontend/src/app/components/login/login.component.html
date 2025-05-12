@@ -4,23 +4,28 @@
     <h2 *ngIf="codeSent">Enter Verification Code</h2>
 
     <form (submit)="onSubmit()" autocomplete="off">
-      <!-- Step 1: Email Input -->
+      <!-- Email Input -->
       <div class="input-group" *ngIf="!codeSent">
         <label for="email">Email</label>
         <input type="email" id="email" [(ngModel)]="email" name="email" required />
       </div>
 
-      <!-- Step 2: Code Input -->
+      <!-- Code Input -->
       <div class="input-group" *ngIf="codeSent">
         <label for="code">6-Digit Code</label>
         <input type="text" id="code" [(ngModel)]="verificationCode" name="code" required maxlength="6" />
       </div>
 
-      <button type="submit" class="login-btn">
-        {{ codeSent ? 'Verify Code' : 'Send Code' }}
+      <button type="submit" class="login-btn" [disabled]="isLoading">
+        {{ isLoading ? 'Please wait...' : (codeSent ? 'Verify Code' : 'Send Code') }}
       </button>
 
-      <div class="signup-link" *ngIf="codeSent">
+      <!-- Message -->
+      <div class="info-message" *ngIf="codeSentMessage">
+        {{ codeSentMessage }}
+      </div>
+
+      <div class="signup-link" *ngIf="codeSent && !isLoading">
         Didn't receive a code? <a href="#" (click)="resendCode($event)">Resend</a>
       </div>
     </form>

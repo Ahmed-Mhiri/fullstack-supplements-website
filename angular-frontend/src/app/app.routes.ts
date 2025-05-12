@@ -4,9 +4,10 @@ import { SuppsComponent } from './components/supps/supps.component';
 import { SupplementDetailComponent } from './components/supplement-detail/supplement-detail.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
 import { LoginComponent } from './components/login/login.component';
-import { SignupComponent } from './components/signup/signup.component';
+import { UserOrdersComponent } from './components/user-orders/user-orders.component';
 
 export const routes: Routes = [
+  { path: '', redirectTo: '/supps/sports%20nutrition/1', pathMatch: 'full' },
   { path: 'wishlist', component: WishlistComponent },
   { path: 'supps/:filterType/:filterValue/:page', component: SuppsComponent },
   { path: 'supps/:category/:page', component: SuppsComponent },
@@ -18,5 +19,5 @@ export const routes: Routes = [
   { path: 'checkout', component: CheckoutComponent },
   { path: 'supps/search/:filterValue/:page', component: SuppsComponent },
   { path: 'login', component: LoginComponent },
-  {path: 'signup', component: SignupComponent},
+  {path: 'user-orders',component: UserOrdersComponent}
 ];

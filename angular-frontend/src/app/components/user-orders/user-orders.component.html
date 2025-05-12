@@ -1,1 +1,49 @@
-<p>user-orders works!</p>
+<div class="header-bar">
+  <div class="user-info">
+    <h2>Welcome, {{ customer.name }}</h2>
+    <p>Email: {{ customer.email }}</p>
+  </div>
+  <button class="logout-btn" (click)="logout()">Logout</button>
+</div>
+
+  <h3>Your Orders:</h3>
+  <div *ngFor="let order of orders" class="order-card">
+    <h4>
+      Order: {{ order.orderCode }} 
+      <span class="status" [ngClass]="order.status.toLowerCase()">{{ order.status }}</span>
+    </h4>
+    <p>Date: {{ order.orderDate | date: 'medium' }}</p>
+
+    <table>
+      <tr>
+        <th>Supplement</th>
+        <th>Quantity</th>
+        <th>Price (€)</th>
+        <th>Image</th>
+      </tr>
+      <tr *ngFor="let supplement of order.supplements">
+        <td>{{ supplement.name }}</td>
+        <td>{{ supplement.quantity }}</td>
+        <td>{{ supplement.priceEuro }}</td>
+        <td>
+          <img [src]="supplement.imageUrl" alt="{{ supplement.name }}" width="50" />
+        </td>
+      </tr>
+      <tr class="total-row">
+      <td colspan="2"><strong>Total:</strong></td>
+       <td colspan="2"><strong>{{ order.totalPrice | number: '1.2-2' }} €</strong></td>
+      </tr>
+    </table>
+    <div class="supplement-card" *ngFor="let supplement of order.supplements">
+  <img [src]="supplement.imageUrl" alt="{{ supplement.name }}" />
+  <div class="supplement-info">
+    <p><strong>{{ supplement.name }}</strong></p>
+    <p>Quantity: {{ supplement.quantity }}</p>
+    <p>Price: {{ supplement.priceEuro }} €</p>
+  </div>
+</div>
+<div class="mobile-total">
+  Total: {{ order.totalPrice | number: '1.2-2' }} €
+</div>
+  </div>
+  <!-- Mobile Supplement Cards -->

@@ -145,8 +145,15 @@
 
   <!-- ✅ Submit Button -->
   <div class="form-group submit-section">
-    <button type="submit" class="submit-btn" [disabled]="buyerForm.invalid">Complete Order</button>
+    <button type="submit" class="submit-btn" [disabled]="buyerForm.invalid" style="
+    background-color: black;
+">Complete Order</button>
   </div>
 
   <div class="total-price" style="font-weight: bold;">Total: €{{ totalPrice.toFixed(2) }}</div>
 </form>
+<div class="overlay" *ngIf="successMessage">
+  <div class="overlay-message">
+    {{ successMessage }}
+  </div>
+</div>

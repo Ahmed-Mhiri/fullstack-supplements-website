@@ -31,6 +31,7 @@ goToProfile() {
   searchQuery = '';
   allProducts: Supplement[] = [];
   filteredProducts: Supplement[] = [];
+  isLoggedIn: boolean = false;
 
   constructor(
     private supplementService: SupplementService,
@@ -41,6 +42,8 @@ goToProfile() {
   ) {}
 
   ngOnInit(): void {
+    const userEmail = localStorage.getItem('userEmail');
+    this.isLoggedIn = !!userEmail; // Will set isLoggedIn to true if userEmail exists
     this.sharedService.cartItems$.subscribe(cartItems => {
       this.cartCount = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
     });
@@ -145,5 +148,8 @@ onSearchIconClick(event: Event): void {
   onProductCardClicked(product: Supplement): void {
     this.isSearchActive = false; // Close the search overlay
     this.isMobileSearchActive = false;
+  }
+  navigateToSupps(): void {
+    this.router.navigate(['/supps/sports nutrition/1']);
   }
 }

@@ -303,3 +303,20 @@
   }
   
 }
+svg.logged-in {
+  color: #4CAF50;
+}
+
+svg.logged-out {
+  color: #E74C3C;
+}
+
+svg.logged-in:hover {
+  color: #388E3C;
+  transform: scale(1.1);
+}
+
+svg.logged-out:hover {
+  color: #C0392B;
+  transform: scale(1.1);
+}

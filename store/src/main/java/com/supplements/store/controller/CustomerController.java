@@ -1,6 +1,8 @@
 package com.supplements.store.controller;
 
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,12 +14,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.supplements.store.DTO.CustomerDetailsDTO;
 import com.supplements.store.DTO.CustomerRequest;
 import com.supplements.store.model.Customer;
 import com.supplements.store.service.CustomerService;
 
 @RestController
-@RequestMapping("/customers")
+@RequestMapping("/api/customers")
 @CrossOrigin(origins = "http://localhost:4200") // Adjust to your Angular app's URL
 public class CustomerController {
 
@@ -64,4 +67,16 @@ public class CustomerController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @GetMapping("/details/{email}")
+    public ResponseEntity<?> getCustomerDetailsWithOrders(@PathVariable String email) {
+    Optional<Customer> customerOpt = customerService.findByEmail(email);
+    if (customerOpt.isEmpty()) {
+        return ResponseEntity.notFound().build();
+    }
+
+    Customer customer = customerOpt.get();
+    // Create a DTO to avoid recursive serialization
+    return ResponseEntity.ok(new CustomerDetailsDTO(customer));
+}
+
 }

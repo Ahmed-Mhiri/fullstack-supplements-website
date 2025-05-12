@@ -91,3 +91,12 @@
 .signup-link a:hover {
   text-decoration: underline;
 }
+.info-message {
+  margin-top: 10px;
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.info-message.error {
+  color: #e74c3c;
+}

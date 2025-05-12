@@ -5,6 +5,7 @@ import { SharedService } from '../../services/shared.service';
 import { Supplement } from '../../models/supplement.model';
 import { CartResumeComponent } from "../cart-resume/cart-resume.component";
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-checkout',
@@ -14,6 +15,9 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./checkout.component.scss']
 })
 export class CheckoutComponent implements OnInit {
+  constructor(private sharedService: SharedService, private router: Router, private http: HttpClient) {}
+
+  successMessage: string = '';
 
   buyer = {
     company: '',
@@ -53,8 +57,6 @@ export class CheckoutComponent implements OnInit {
 
   cartItems: Supplement[] = []; // Local variable to store cart items
 
-  constructor(private sharedService: SharedService, private http: HttpClient) {}
-
   ngOnInit(): void {
     // Subscribe to cart items and update the total price whenever the cart changes
     this.sharedService.cartItems$.subscribe((cartItems: Supplement[]) => {
@@ -69,7 +71,6 @@ export class CheckoutComponent implements OnInit {
     return;
   }
 
-  // Prepare the customer data (to send to the backend for customer creation/update)
   const customerData = {
     firstName: this.buyer.firstName,
     lastName: this.buyer.lastName,
@@ -82,41 +83,51 @@ export class CheckoutComponent implements OnInit {
     city: this.invoice.city,
   };
 
-  // Validate if the customer data has required fields
   if (!customerData.firstName || !customerData.streetAddress) {
     alert('First name and street address are required!');
     return;
   }
 
-  console.log("Customer Data to be sent:", customerData);
-
-  // Prepare the order data (to send to the backend for order creation)
   const orderData = {
-  customerRequest: customerData,
-  supplements: this.cartItems.map(item => ({
-    supplementId: item.id,
-    quantity: item.quantity
-  }))
-};
-    console.log("Order Data being sent:", JSON.stringify(orderData, null, 2));
+    customerRequest: customerData,
+    supplements: this.cartItems.map(item => ({
+      supplementId: item.id,
+      quantity: item.quantity
+    }))
+  };
 
-     console.log(this.cartItems);
-  this.http.post('http://localhost:8080/customers', customerData)
-    .subscribe(customerResponse => {
+  this.http.post('http://localhost:8080/api/customers', customerData).subscribe({
+    next: (customerResponse) => {
       console.log('Customer saved or updated successfully', customerResponse);
 
-      this.http.post('http://localhost:8080/orders', orderData)
-        .subscribe(orderResponse => {
+      this.http.post('http://localhost:8080/api/orders', orderData).subscribe({
+        next: (orderResponse) => {
           console.log('Order placed successfully', orderResponse);
-        }, error => {
+
+          // Clear the cart after successful order
+          this.sharedService.clearCart();
+
+          // Show success message (bind it in template if desired)
+          this.successMessage = '🎉 Your order has been placed successfully! Redirecting...';
+
+          // Redirect after 3 seconds
+          setTimeout(() => {
+            this.router.navigate(['/']);
+          }, 3000);
+        },
+        error: (error) => {
           console.error('Error placing order', error);
           alert('Error placing order: ' + error.message);
-        });
-    }, error => {
+        }
+      });
+    },
+    error: (error) => {
       console.error('Error saving/updating customer', error);
       alert('Error saving/updating customer: ' + error.message);
-    });
+    }
+  });
 }
+
 
   onPaymentMethodChange(): void {
     // Handle any logic for payment method change
@@ -141,4 +152,5 @@ export class CheckoutComponent implements OnInit {
       this.selectedCountryCode = '+34';
     }
   }
+  
 }

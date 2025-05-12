@@ -17,4 +17,7 @@ export class AuthService {
   verifyCode(email: string, code: string): Observable<{ valid: boolean }> {
     return this.http.post<{ valid: boolean }>(`${this.baseUrl}/verify-code`, { email, code });
   }
+  getCustomerDetails(email: string): Observable<any> {
+  return this.http.get(`http://localhost:8080/api/customers/details/${email}`);
+}
 }
