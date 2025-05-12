@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import com.supplements.store.model.Supplement;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface SupplementRepository extends JpaRepository<Supplement, Long> {
@@ -54,4 +55,5 @@ public interface SupplementRepository extends JpaRepository<Supplement, Long> {
                                                    @Param("brand") String brand,
                                                    @Param("goals") String goals,
                                                    Pageable pageable);
+        Optional<Supplement> findById(Long supplementId);  // Use Optional for better null handling
 }

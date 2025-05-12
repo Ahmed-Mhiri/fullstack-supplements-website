@@ -33,8 +33,8 @@ public class OrderController {
              return ResponseEntity.badRequest().body("Customer email is required.");
         }
         // Validate supplements (e.g., not null, not empty, or allow empty if business logic permits)
-        if (orderRequest.getSupplementIds() == null) { // or .isEmpty() depending on rules
-            return ResponseEntity.badRequest().body("Supplement information is required.");
+        if (orderRequest.getSupplements() == null || orderRequest.getSupplements().isEmpty()) {
+    return ResponseEntity.badRequest().body("Supplement list (with quantities) is required.");
         }
 
         try {

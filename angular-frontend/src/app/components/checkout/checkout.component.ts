@@ -92,9 +92,12 @@ export class CheckoutComponent implements OnInit {
 
   // Prepare the order data (to send to the backend for order creation)
   const orderData = {
-    customerRequest: customerData,
-    supplementIds: this.cartItems.map(item => item.id),
-  };
+  customerRequest: customerData,
+  supplements: this.cartItems.map(item => ({
+    supplementId: item.id,
+    quantity: item.quantity
+  }))
+};
     console.log("Order Data being sent:", JSON.stringify(orderData, null, 2));
 
      console.log(this.cartItems);

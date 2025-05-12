@@ -1,12 +1,21 @@
 package com.supplements.store.model;
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.data.annotation.LastModifiedDate;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "customers")
 public class Customer {
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +46,8 @@ public class Customer {
     @Column(nullable = false)
     private String city; // From your invoice object
 
-    // Bidirectional One-to-Many: One Customer can have many Orders
+    // Use @JsonIgnore to prevent infinite recursion
+    @JsonIgnore
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
 
@@ -53,6 +63,10 @@ public class Customer {
         this.streetAddress = streetAddress;
         this.zip = zip;
         this.city = city;
+    }
+    
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
     // Getters and Setters

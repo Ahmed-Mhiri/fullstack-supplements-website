@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "orders") // JPA uses "order" by default, which can be a SQL keyword.
 public class Order {
@@ -30,16 +32,21 @@ public class Order {
     // Bidirectional Many-to-One: Many Orders belong to one Customer
     @ManyToOne(fetch = FetchType.LAZY) // LAZY is generally preferred for performance
     @JoinColumn(name = "customer_id", nullable = false) // Foreign key in the orders table
+    @JsonIgnore
     private Customer customer;
 
-    // Storing supplement IDs. For a full ManyToMany with a Supplement entity:
-    // @ManyToMany
-    // @JoinTable(...)
-    // private List<Supplement> supplements = new ArrayList<>();
-    @ElementCollection(fetch = FetchType.LAZY) // Stores a collection of basic types
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "order_supplement_ids", joinColumns = @JoinColumn(name = "order_id"))
-    @Column(name = "supplement_id")
-    private List<Long> supplementIds = new ArrayList<>();
+    private List<OrderSupplement> supplements = new ArrayList<>();
+
+    // Getters and setters for all fields
+    public List<OrderSupplement> getSupplements() {
+        return supplements;
+    }
+
+    public void setSupplements(List<OrderSupplement> supplements) {
+        this.supplements = supplements;
+    }
 
     // Constructors
     public Order() {
@@ -96,13 +103,6 @@ public class Order {
         this.customer = customer;
     }
 
-    public List<Long> getSupplementIds() {
-        return supplementIds;
-    }
-
-    public void setSupplementIds(List<Long> supplementIds) {
-        this.supplementIds = supplementIds;
-    }
 
     @Override
     public boolean equals(Object o) {
