@@ -27,3 +27,6 @@ OPTIONALLY ENCLOSED BY '"'
 LINES TERMINATED BY '\r\n'
 IGNORE 1 ROWS
 (name, price_euro, image_url, product_url, flavor, weight_volume, brand, category, goals);
+
+DELETE FROM supplement
+WHERE price_euro IS NULL;
