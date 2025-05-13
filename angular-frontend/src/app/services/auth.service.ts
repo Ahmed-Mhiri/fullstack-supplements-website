@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:8080/api/auth'; // Adjust if needed
+  private baseUrl = 'https://suppstore-d4a57eabc73b.herokuapp.com/api/auth'; // Adjust if needed
 
   constructor(private http: HttpClient) {}
 
@@ -18,6 +18,6 @@ export class AuthService {
     return this.http.post<{ valid: boolean }>(`${this.baseUrl}/verify-code`, { email, code });
   }
   getCustomerDetails(email: string): Observable<any> {
-  return this.http.get(`http://localhost:8080/api/customers/details/${email}`);
+  return this.http.get(`https://suppstore-d4a57eabc73b.herokuapp.com/api/customers/details/${email}`);
 }
 }
