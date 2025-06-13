@@ -50,8 +50,7 @@
                 "maximumError": "7kB"     
               }
             ],
-              "outputHashing": "all",
-              "baseHref": "/fullstack-supplements-website/"
+              "outputHashing": "all"
             }
           },
           "defaultConfiguration": "production"

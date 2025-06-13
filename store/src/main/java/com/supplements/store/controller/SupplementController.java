@@ -19,7 +19,10 @@ import com.supplements.store.repository.SupplementRepository;  // Added to handl
 
 @RestController
 @RequestMapping("/api/supplements")
-@CrossOrigin(origins = "http://localhost:4200") // Allow requests from Angular frontend
+@CrossOrigin(origins = {
+    "http://localhost:4200",
+    "https://ahmed-mhiri.github.io"
+})
 public class SupplementController {
 
     private final SupplementRepository repository;

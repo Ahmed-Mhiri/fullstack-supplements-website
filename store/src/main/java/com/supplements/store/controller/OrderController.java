@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "http://localhost:4200") // Adjust to your Angular app's URL
-public class OrderController {
+@CrossOrigin(origins = {
+    "http://localhost:4200",
+    "https://ahmed-mhiri.github.io"
+})
+    public class OrderController {
 
     private final OrderService orderService;
 
@@ -40,10 +43,10 @@ public class OrderController {
         try {
             Order createdOrder = orderService.placeOrder(orderRequest); // This service method handles customer and order
             return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
-        } catch (Exception e) { // Catch more specific exceptions
-            // Log error: e.getMessage()
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error placing order: " + e.getMessage());
-        }
+        } catch (Exception e) {
+    e.printStackTrace(); // Logs to console (Heroku log)
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error placing order: " + e.getMessage());
+}
     }
 
     @GetMapping("/{id}")

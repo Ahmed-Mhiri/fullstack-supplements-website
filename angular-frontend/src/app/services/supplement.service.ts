@@ -8,7 +8,7 @@ import { PaginatedResponse } from '../models/paginated-response'; // Ensure this
   providedIn: 'root'
 })
 export class SupplementService {
-   private apiUrl = 'http://localhost:8080/api/supplements'; // Your confirmed correct backend URL
+   private apiUrl = 'https://suppstore-d4a57eabc73b.herokuapp.com/api/supplements'; // Your confirmed correct backend URL
 
   constructor(private http: HttpClient) {}
 

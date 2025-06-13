@@ -6,6 +6,7 @@ import { Supplement } from '../../models/supplement.model';
 import { CartResumeComponent } from "../cart-resume/cart-resume.component";
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-checkout',
@@ -95,14 +96,15 @@ export class CheckoutComponent implements OnInit {
       quantity: item.quantity
     }))
   };
+  this.http.post(`${environment.apiUrl}/orders`, orderData).subscribe({
+        next: (orderResponse) => {
+          console.log('Order placed successfully', orderResponse);
 
-  this.http.post('http://localhost:8080/api/customers', customerData).subscribe({
+  this.http.post(`${environment.apiUrl}/customers`, customerData).subscribe({
     next: (customerResponse) => {
       console.log('Customer saved or updated successfully', customerResponse);
 
-      this.http.post('http://localhost:8080/api/orders', orderData).subscribe({
-        next: (orderResponse) => {
-          console.log('Order placed successfully', orderResponse);
+      
 
           // Clear the cart after successful order
           this.sharedService.clearCart();

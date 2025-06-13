@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'https://suppstore-d4a57eabc73b.herokuapp.com/api/auth'; // Adjust if needed
+  private baseUrl = `${environment.apiUrl}/auth`;
 
   constructor(private http: HttpClient) {}
 
@@ -18,6 +19,6 @@ export class AuthService {
     return this.http.post<{ valid: boolean }>(`${this.baseUrl}/verify-code`, { email, code });
   }
   getCustomerDetails(email: string): Observable<any> {
-  return this.http.get(`https://suppstore-d4a57eabc73b.herokuapp.com/api/customers/details/${email}`);
+  return this.http.get(`${this.baseUrl}/customers/details/${email}`);
 }
 }

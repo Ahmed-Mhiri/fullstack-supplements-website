@@ -21,8 +21,11 @@ import com.supplements.store.service.CustomerService;
 
 @RestController
 @RequestMapping("/api/customers")
-@CrossOrigin(origins = "http://localhost:4200") // Adjust to your Angular app's URL
-public class CustomerController {
+@CrossOrigin(origins = {
+    "http://localhost:4200",
+    "https://ahmed-mhiri.github.io"
+})
+    public class CustomerController {
 
     private final CustomerService customerService;
 
