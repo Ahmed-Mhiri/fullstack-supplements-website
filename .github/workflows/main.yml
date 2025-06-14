@@ -1,5 +1,5 @@
 # .github/workflows/main.yml
-# Final workflow with build-time configuration
+# Final workflowa with build-time configuration
 # This is a dummy change to force GitHub to re-read the workflow file - DELETE ME LATER
 name: Build, Push, and Deploy
 
@@ -78,7 +78,7 @@ jobs:
                 echo "ERROR: nginx.conf was not created or is empty. Check NGINX_CONF_FILE secret."
                 exit 1
             fi
-            cat nginx.conf
+            cat nginx.conf 
 
             echo "--- Creating or updating .env file ---"
             > .env
