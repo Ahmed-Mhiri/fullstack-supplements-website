@@ -1,5 +1,5 @@
 # .github/workflows/main.yml
-# Final workflowa with build-time configuration
+# Final workflow with build-time configuration
 # This is a dummy change to force GitHub to re-read the workflow file - DELETE ME LATER
 name: Build, Push, and Deploy
 
@@ -78,16 +78,25 @@ jobs:
                 echo "ERROR: nginx.conf was not created or is empty. Check NGINX_CONF_FILE secret."
                 exit 1
             fi
-            cat nginx.conf 
+            cat nginx.conf
 
             echo "--- Creating or updating .env file ---"
             > .env
-            # --- CORRECTED SYNTAX FOR GITHUB ACTIONS EXPRESSIONS ---
-            echo "MYSQL_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD || '' }}" >> .env
-            echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME || '' }}" >> .env
-            echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD || '' }}" >> .env
-            echo "IMAGE_TAG=${{ needs.build-and-push.outputs.version || '' }}" >> .env
-            # --- END CORRECTED SYNTAX ---
+            # --- ULTIMATE BULLETPROOF SECRET EXPANSION ---
+            # This assigns the secret to a shell variable, ensuring it always has a value (even empty string).
+            # Then, 'printf' is used for the most robust string output, preventing any shell parsing issues.
+            _DB_ROOT_PASSWORD_VAL="${{ secrets.DB_ROOT_PASSWORD || '' }}"
+            printf "MYSQL_ROOT_PASSWORD=%s\n" "${_DB_ROOT_PASSWORD_VAL}" >> .env
+
+            _SPRING_DATASOURCE_USERNAME_VAL="${{ secrets.SPRING_DATASOURCE_USERNAME || '' }}"
+            printf "SPRING_DATASOURCE_USERNAME=%s\n" "${_SPRING_DATASOURCE_USERNAME_VAL}" >> .env
+
+            _SPRING_DATASOURCE_PASSWORD_VAL="${{ secrets.SPRING_DATASOURCE_PASSWORD || '' }}"
+            printf "SPRING_DATASOURCE_PASSWORD=%s\n" "${_SPRING_DATASOURCE_PASSWORD_VAL}" >> .env
+
+            _IMAGE_TAG_VAL="${{ needs.build-and-push.outputs.version || '' }}"
+            printf "IMAGE_TAG=%s\n" "${_IMAGE_TAG_VAL}" >> .env
+            # --- END ULTIMATE BULLETPROOF SECRET EXPANSION ---
             if [ ! -s .env ]; then
                 echo "ERROR: .env file was not created or is empty. Check related secrets."
                 exit 1
