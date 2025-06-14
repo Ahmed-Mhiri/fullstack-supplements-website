@@ -82,15 +82,12 @@ jobs:
 
             echo "--- Creating or updating .env file ---"
             > .env
-            # --- ULTIMATE RADICAL FIX FOR UNBOUND VARIABLE ---
-            # This uses shell parameter expansion (${VAR :- default})
-            # to ensure the variable always resolves to a string (even empty),
-            # preventing the "unbound variable" error.
-            echo "MYSQL_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD :- }}" >> .env
-            echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME :- }}" >> .env
-            echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD :- }}" >> .env
-            echo "IMAGE_TAG=${{ needs.build-and-push.outputs.version :- }}" >> .env
-            # --- END ULTIMATE RADICAL FIX ---
+            # --- CORRECTED SYNTAX FOR GITHUB ACTIONS EXPRESSIONS ---
+            echo "MYSQL_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD || '' }}" >> .env
+            echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME || '' }}" >> .env
+            echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD || '' }}" >> .env
+            echo "IMAGE_TAG=${{ needs.build-and-push.outputs.version || '' }}" >> .env
+            # --- END CORRECTED SYNTAX ---
             if [ ! -s .env ]; then
                 echo "ERROR: .env file was not created or is empty. Check related secrets."
                 exit 1
