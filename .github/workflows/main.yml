@@ -1,4 +1,4 @@
-# Final workflow with build-time configuration
+# .github/workflows/main.yml
 name: Build, Push, and Deploy
 
 on:
@@ -32,8 +32,6 @@ jobs:
           tags: |
             ahmhi003/suppstore-backend:latest
             ahmhi003/suppstore-backend:${{ steps.get_sha.outputs.sha_short }}
-          # --- THIS IS THE CRITICAL CHANGE ---
-          # Pass secrets as build arguments to the Dockerfile
           build-args: |
             DB_URL=jdbc:mysql://database:3306/supplements_db?useSSL=false&allowPublicKeyRetrieval=true
             DB_USER=${{ secrets.SPRING_DATASOURCE_USERNAME }}
@@ -59,10 +57,6 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            # Set options for strict error checking:
-            # -e: Exit immediately if a command exits with a non-zero status.
-            # -u: Treat unset variables as an error when substituting.
-            # -o pipefail: The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status, or zero if all commands in the pipeline exit successfully.
             set -euo pipefail
 
             echo "--- Changing to application directory ---"
@@ -70,66 +64,57 @@ jobs:
 
             echo "--- Writing docker-compose.prod.yml from secret ---"
             echo "${{ secrets.PROD_COMPOSE_FILE }}" > docker-compose.prod.yml
-            # Verify file creation, or exit immediately
-            if [ ! -s docker-compose.prod.yml ]; then # -s checks if file exists and is not empty
+            if [ ! -s docker-compose.prod.yml ]; then
                 echo "ERROR: docker-compose.prod.yml was not created or is empty. Check PROD_COMPOSE_FILE secret."
                 exit 1
             fi
-            cat docker-compose.prod.yml # Output file content for debugging in workflow logs
+            cat docker-compose.prod.yml
 
             echo "--- Writing nginx.conf from secret ---"
             echo "${{ secrets.NGINX_CONF_FILE }}" > nginx.conf
-            # Verify file creation, or exit immediately
             if [ ! -s nginx.conf ]; then
                 echo "ERROR: nginx.conf was not created or is empty. Check NGINX_CONF_FILE secret."
                 exit 1
             fi
-            cat nginx.conf # Output file content for debugging in workflow logs
+            cat nginx.conf
 
             echo "--- Creating or updating .env file ---"
-            # Create/clear the .env file, then append secret values
-            > .env # This truncates the file, effectively creating a new one if it exists
-            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+            > .env
+            echo "MYSQL_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env # <--- Updated to use DB_ROOT_PASSWORD
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
             echo "IMAGE_TAG=${{ needs.build-and-push.outputs.version }}" >> .env
-            # Add a check to ensure .env has content (basic check)
             if [ ! -s .env ]; then
                 echo "ERROR: .env file was not created or is empty. Check related secrets."
                 exit 1
             fi
-            # cat .env # CAUTION: Do NOT `cat .env` directly in workflow logs as it exposes secrets!
 
             echo "--- Pulling latest Docker images ---"
             docker compose -f docker-compose.prod.yml --env-file .env pull || { echo "ERROR: docker compose pull command failed."; exit 1; }
 
             echo "--- Stopping and removing existing services (force recreate) ---"
-            # Use 'down' with --remove-orphans and capture its output
             docker compose -f docker-compose.prod.yml --env-file .env down --remove-orphans 2>&1 | tee docker-compose-down.log
             cat docker-compose-down.log
 
             echo "--- Bringing up services in detached mode ---"
-            # Run 'up' command, pipe its output to a file, and capture its exit code
-            # 2>&1 redirects stderr to stdout, tee saves it to a file and prints to console
             docker compose -f docker-compose.prod.yml --env-file .env up -d --force-recreate 2>&1 | tee docker-compose-up.log
-            COMPOSE_UP_EXIT_CODE=${PIPESTATUS[0]} # Get exit code of docker compose (even if tee succeeds)
+            COMPOSE_UP_EXIT_CODE=${PIPESTATUS[0]}
             
             echo "--- docker compose up output ---"
-            cat docker-compose-up.log # Print the captured logs
+            cat docker-compose-up.log
             
             if [ $COMPOSE_UP_EXIT_CODE -ne 0 ]; then
                 echo "CRITICAL ERROR: 'docker compose up' command failed with exit code $COMPOSE_UP_EXIT_CODE."
                 echo "Review the 'docker-compose-up.log' above for details."
-                exit 1 # Fail the GitHub Actions job
+                exit 1
             fi
 
             echo "--- Verifying app-nginx-proxy-1 container status ---"
-            # Check if the specific container is running
             if ! docker ps | grep -q app-nginx-proxy-1; then
                 echo "CRITICAL ERROR: 'app-nginx-proxy-1' container is NOT running after deployment!"
                 echo "Attempting to get last logs for 'app-nginx-proxy-1' for diagnostics:"
                 docker logs app-nginx-proxy-1 || echo "Could not retrieve logs for app-nginx-proxy-1."
-                exit 1 # Fail the GitHub Actions job
+                exit 1
             fi
             
             echo "--- Deployment successful! Listing all running containers ---"
