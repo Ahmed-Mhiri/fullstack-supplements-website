@@ -1,4 +1,4 @@
-# File: .github/workflows/build-and-deploy.yml
+# Final version of .github/workflows/build-and-deploy.yml
 name: Build, Push, and Deploy
 
 on:
@@ -8,9 +8,17 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    # Add outputs to pass the version to the next job
+    outputs:
+      version: ${{ steps.get_sha.outputs.sha_short }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # New step to get the short git commit hash
+      - name: Get short Git SHA
+        id: get_sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -26,16 +34,23 @@ jobs:
         with:
           context: ./store
           push: true
-          tags: ahmhi003/suppstore-backend:latest
+          # Tag with both 'latest' and the unique Git SHA
+          tags: |
+            ahmhi003/suppstore-backend:latest
+            ahmhi003/suppstore-backend:${{ steps.get_sha.outputs.sha_short }}
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./angular-frontend
           push: true
-          tags: ahmhi003/suppstore-frontend:latest
+          # Tag with both 'latest' and the unique Git SHA
+          tags: |
+            ahmhi003/suppstore-frontend:latest
+            ahmhi003/suppstore-frontend:${{ steps.get_sha.outputs.sha_short }}
 
   deploy:
+    # Get the version from the previous job
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
@@ -49,22 +64,18 @@ jobs:
             # Navigate to the app directory
             cd /home/ubuntu/app
 
-            # Create the production docker-compose file from a GitHub secret
+            # Create the configuration files
             echo "${{ secrets.PROD_COMPOSE_FILE }}" > docker-compose.prod.yml
-
-            # Create the Nginx configuration file from a GitHub secret
             echo "${{ secrets.NGINX_CONF_FILE }}" > nginx.conf
-
-            # Create the .env file for database credentials from secrets
+            
+            # Create the .env file and ADD THE IMAGE_TAG to it
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
             echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
             echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+            echo "IMAGE_TAG=${{ needs.build-and-push.outputs.version }}" >> .env
 
-            # 1. Explicitly pull the newest versions of the images from Docker Hub
-            docker-compose -f docker-compose.prod.yml pull
-
-            # 2. Force Docker to stop the old containers and re-create them with the new images
-            docker-compose -f docker-compose.prod.yml up -d --force-recreate
-
-            # 3. Clean up old, unused Docker images to save space
+            # Use --env-file to pass the IMAGE_TAG to docker-compose
+            docker-compose -f docker-compose.prod.yml --env-file .env pull
+            docker-compose -f docker-compose.prod.yml --env-file .env up -d --force-recreate
+            
             docker system prune -af
