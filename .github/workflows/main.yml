@@ -1,4 +1,6 @@
 # .github/workflows/main.yml
+# Final workflow with build-time configuration
+# This is a dummy change to force GitHub to re-read the workflow file - DELETE ME LATER
 name: Build, Push, and Deploy
 
 on:
