@@ -1,4 +1,3 @@
-# Simplified docker-compose.prod.yml
 version: '3.8'
 
 services:
@@ -29,6 +28,9 @@ services:
 
   nginx-proxy:
     image: nginx:alpine
+    container_name: app-nginx-proxy-1 # Added this based on your `docker ps` output
+    ports:
+      - "80:80" # <--- THIS IS THE CRUCIAL CHANGE
     # ... (rest of nginx config is fine)
 
 volumes:
