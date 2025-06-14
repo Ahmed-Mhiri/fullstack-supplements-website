@@ -39,18 +39,22 @@
           "configurations": {
             "production": {
               "budgets": [
-              {
-                "type": "initial",
-                "maximumWarning": "1MB",
-                "maximumError": "1.5MB"
-              },
-              {
-                "type": "anyComponentStyle",
-                "maximumWarning": "6kB", 
-                "maximumError": "7kB"     
-              }
-            ],
+                {
+                  "type": "initial",
+                  "maximumWarning": "1MB",
+                  "maximumError": "1.5MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kB",
+                  "maximumError": "7kB"
+                }
+              ],
               "outputHashing": "all"
+            },
+            "development": { 
+              "optimization": false, 
+              "sourceMap": true      
             }
           },
           "defaultConfiguration": "production"
@@ -80,9 +84,9 @@
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-  "src/assets",
-  "src/favicon.ico"
-],
+              "src/assets",
+              "src/favicon.ico"
+            ],
             "styles": [
               "src/styles.scss"
             ],

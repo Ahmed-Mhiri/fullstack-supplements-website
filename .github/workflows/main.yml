@@ -1,8 +1,9 @@
-name: Build and Push to Docker Hub
+# File: .github/workflows/build-and-deploy.yml
+name: Build, Push, and Deploy
 
 on:
   push:
-    branches: [ "master" ] # Your main branch is named 'master'
+    branches: [ "master" ]
 
 jobs:
   build-and-push:
@@ -25,7 +26,7 @@ jobs:
         with:
           context: ./store
           push: true
-          tags: ahmhi003/suppstore-backend:latest # Using a more descriptive tag
+          tags: ahmhi003/suppstore-backend:latest
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
@@ -33,3 +34,35 @@ jobs:
           context: ./angular-frontend
           push: true
           tags: ahmhi003/suppstore-frontend:latest
+  
+  deploy:
+    # This job runs after build-and-push is complete
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 instance
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            # Navigate to the app directory
+            cd /home/ubuntu/app
+
+            # Create the production docker-compose file from a GitHub secret
+            echo "${{ secrets.PROD_COMPOSE_FILE }}" > docker-compose.prod.yml
+
+            # Create the .env file for database credentials from secrets
+            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
+            echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+            echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+
+            # Pull the latest images from Docker Hub
+            docker-compose -f docker-compose.prod.yml pull
+
+            # Stop and restart the services with the new images
+            docker-compose -f docker-compose.prod.yml up -d
+
+            # Clean up old, unused Docker images to save space
+            docker system prune -af

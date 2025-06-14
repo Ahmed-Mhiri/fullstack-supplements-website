@@ -3,13 +3,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, map, Observable, of } from 'rxjs';
 import { Supplement } from '../models/supplement.model'; // Ensure this path is correct
 import { PaginatedResponse } from '../models/paginated-response'; // Ensure this path is correct  
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SupplementService {
-   private apiUrl = 'https://suppstore-d4a57eabc73b.herokuapp.com/api/supplements'; // Your confirmed correct backend URL
-
+  private apiUrl = `${environment.apiUrl}/supplements`;
   constructor(private http: HttpClient) {}
 
   // Get supplements with pagination and multiple filters
