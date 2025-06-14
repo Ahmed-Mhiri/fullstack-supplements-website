@@ -34,9 +34,10 @@ jobs:
           context: ./angular-frontend
           push: true
           tags: ahmhi003/suppstore-frontend:latest
-  
+
+  # --- THIS IS THE CORRECTED PART ---
+  # The 'deploy' job is now at the same indentation level as 'build-and-push'
   deploy:
-    # This job runs after build-and-push is complete
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
@@ -58,11 +59,11 @@ jobs:
             echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
             echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
 
-            # Pull the latest images from Docker Hub
+            # 1. Explicitly pull the newest versions of the images from Docker Hub
             docker-compose -f docker-compose.prod.yml pull
 
-            # Stop and restart the services with the new images
-            docker-compose -f docker-compose.prod.yml up -d
+            # 2. Force Docker to stop the old containers and re-create them with the new images
+            docker-compose -f docker-compose.prod.yml up -d --force-recreate
 
-            # Clean up old, unused Docker images to save space
+            # 3. Clean up old, unused Docker images to save space
             docker system prune -af
