@@ -8,8 +8,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: supplements_db
-      MYSQL_USER: ${SPRING_DATASOURCE_USERNAME} # DB needs this to create the user
-      MYSQL_PASSWORD: ${SPRING_DATASOURCE_PASSWORD} # DB needs this to set the password
+      MYSQL_USER: ${SPRING_DATASOURCE_USERNAME}
+      MYSQL_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
     volumes:
       - db-data:/var/lib/mysql
 
@@ -17,21 +17,24 @@ services:
     image: ahmhi003/suppstore-backend:${IMAGE_TAG:-latest}
     container_name: suppstore-backend
     restart: always
-    # NO environment variables are needed here anymore!
-    # The configuration is now baked into the image.
     depends_on:
       - database
 
   frontend:
     image: ahmhi003/suppstore-frontend:${IMAGE_TAG:-latest}
-    # ... (rest of frontend config is fine)
+    container_name: app-frontend-1 # Ensure this name matches the one used in nginx.conf
+    restart: always
 
-  nginx-proxy:
+  nginx-proxy: # <--- THIS SERVICE MUST BE PRESENT AND UNCOMMENTED
     image: nginx:alpine
-    container_name: app-nginx-proxy-1 # Added this based on your `docker ps` output
+    container_name: app-nginx-proxy-1
     ports:
-      - "80:80" # <--- THIS IS THE CRUCIAL CHANGE
-    # ... (rest of nginx config is fine)
+      - "80:80" # Map host port 80 to container port 80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
 
 volumes:
   db-data:
