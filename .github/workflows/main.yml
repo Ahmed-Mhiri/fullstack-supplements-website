@@ -1,5 +1,6 @@
 # .github/workflows/main.yml
 # Final workflow with build-time configuration
+# This is a dummy change to force GitHub to re-read the workflow file - DELETE ME LATER
 name: Build, Push, and Deploy
 
 on:
@@ -58,10 +59,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            # --- IMPORTANT CHANGE: REMOVED '-u' from set options ---
-            # -e: Exit immediately if a command exits with a non-zero status.
-            # -o pipefail: The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status, or zero if all commands in the pipeline exit successfully.
-            set -eo pipefail # <--- THIS LINE IS CHANGED
+            set -eo pipefail
 
             echo "--- Changing to application directory ---"
             cd /home/ubuntu/app || { echo "ERROR: Directory /home/ubuntu/app not found on EC2. Exiting deployment."; exit 1; }
@@ -82,9 +80,16 @@ jobs:
             fi
             cat nginx.conf
 
+            echo "--- Testing Nginx configuration syntax ---" # <--- THIS IS THE KEY TEST STEP
+            docker run --rm -v "$(pwd)/nginx.conf:/etc/nginx/conf.d/default.conf:ro" nginx:alpine nginx -t || \
+            {
+                echo "CRITICAL ERROR: Nginx configuration test failed! See output above for details."
+                docker ps -a | grep app-nginx-proxy-1 && docker logs app-nginx-proxy-1 || true
+                exit 1 # Fail the GitHub Action job if Nginx config is bad
+            }
+
             echo "--- Creating or updating .env file ---"
             > .env
-            # This block uses MYSQL_ROOT_PASSWORD secret name, as per your "working" version
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
