@@ -1,4 +1,4 @@
-# Final version of .github/workflows/build-and-deploy.yml
+# Final workflow with build-time configuration
 name: Build, Push, and Deploy
 
 on:
@@ -8,49 +8,47 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    # Add outputs to pass the version to the next job
     outputs:
       version: ${{ steps.get_sha.outputs.sha_short }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # New step to get the short git commit hash
       - name: Get short Git SHA
         id: get_sha
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
+      
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
           context: ./store
           push: true
-          # Tag with both 'latest' and the unique Git SHA
           tags: |
             ahmhi003/suppstore-backend:latest
             ahmhi003/suppstore-backend:${{ steps.get_sha.outputs.sha_short }}
-
+          # --- THIS IS THE CRITICAL CHANGE ---
+          # Pass secrets as build arguments to the Dockerfile
+          build-args: |
+            DB_URL=jdbc:mysql://database:3306/supplements_db?useSSL=false&allowPublicKeyRetrieval=true
+            DB_USER=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+            DB_PASS=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+            
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./angular-frontend
           push: true
-          # Tag with both 'latest' and the unique Git SHA
           tags: |
             ahmhi003/suppstore-frontend:latest
             ahmhi003/suppstore-frontend:${{ steps.get_sha.outputs.sha_short }}
 
   deploy:
-    # Get the version from the previous job
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
@@ -61,20 +59,16 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            # Navigate to the app directory
             cd /home/ubuntu/app
-
-            # Create the configuration files
             echo "${{ secrets.PROD_COMPOSE_FILE }}" > docker-compose.prod.yml
             echo "${{ secrets.NGINX_CONF_FILE }}" > nginx.conf
             
-            # Create the .env file and ADD THE IMAGE_TAG to it
+            # Create a much simpler .env file now
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
-            echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
-            echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+            echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
+            echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
             echo "IMAGE_TAG=${{ needs.build-and-push.outputs.version }}" >> .env
 
-            # Use --env-file to pass the IMAGE_TAG to docker-compose
             docker-compose -f docker-compose.prod.yml --env-file .env pull
             docker-compose -f docker-compose.prod.yml --env-file .env up -d --force-recreate
             
