@@ -1,6 +1,5 @@
 # .github/workflows/main.yml
 # Final workflow with build-time configuration
-# This is a dummy change to force GitHub to re-read the workflow file - DELETE ME LATER
 name: Build, Push, and Deploy
 
 on:
@@ -59,7 +58,10 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            set -euo pipefail
+            # --- IMPORTANT CHANGE: REMOVED '-u' from set options ---
+            # -e: Exit immediately if a command exits with a non-zero status.
+            # -o pipefail: The return value of a pipeline is the value of the last (rightmost) command to exit with a non-zero status, or zero if all commands in the pipeline exit successfully.
+            set -eo pipefail # <--- THIS LINE IS CHANGED
 
             echo "--- Changing to application directory ---"
             cd /home/ubuntu/app || { echo "ERROR: Directory /home/ubuntu/app not found on EC2. Exiting deployment."; exit 1; }
@@ -82,21 +84,11 @@ jobs:
 
             echo "--- Creating or updating .env file ---"
             > .env
-            # --- ULTIMATE BULLETPROOF SECRET EXPANSION ---
-            # This assigns the secret to a shell variable, ensuring it always has a value (even empty string).
-            # Then, 'printf' is used for the most robust string output, preventing any shell parsing issues.
-            _DB_ROOT_PASSWORD_VAL="${{ secrets.DB_ROOT_PASSWORD || '' }}"
-            printf "MYSQL_ROOT_PASSWORD=%s\n" "${_DB_ROOT_PASSWORD_VAL}" >> .env
-
-            _SPRING_DATASOURCE_USERNAME_VAL="${{ secrets.SPRING_DATASOURCE_USERNAME || '' }}"
-            printf "SPRING_DATASOURCE_USERNAME=%s\n" "${_SPRING_DATASOURCE_USERNAME_VAL}" >> .env
-
-            _SPRING_DATASOURCE_PASSWORD_VAL="${{ secrets.SPRING_DATASOURCE_PASSWORD || '' }}"
-            printf "SPRING_DATASOURCE_PASSWORD=%s\n" "${_SPRING_DATASOURCE_PASSWORD_VAL}" >> .env
-
-            _IMAGE_TAG_VAL="${{ needs.build-and-push.outputs.version || '' }}"
-            printf "IMAGE_TAG=%s\n" "${_IMAGE_TAG_VAL}" >> .env
-            # --- END ULTIMATE BULLETPROOF SECRET EXPANSION ---
+            # This block uses MYSQL_ROOT_PASSWORD secret name, as per your "working" version
+            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+            echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
+            echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
+            echo "IMAGE_TAG=${{ needs.build-and-push.outputs.version }}" >> .env
             if [ ! -s .env ]; then
                 echo "ERROR: .env file was not created or is empty. Check related secrets."
                 exit 1
