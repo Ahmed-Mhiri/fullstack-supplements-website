@@ -1,19 +1,25 @@
+# File: angular-frontend/Dockerfile
+
 # --- Stage 1: Build the Angular application ---
 FROM node:20-alpine as build
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-# This runs the build using your now-corrected angular.json
-RUN npm run build
+
+# THIS IS THE CORRECTED LINE:
+# We add '-- --configuration production' to tell Angular to use environment.prod.ts
+RUN npm run build -- --configuration production
+
 
 # --- Stage 2: Serve the application with Nginx ---
 FROM nginx:stable-alpine
 
-# Copy the compiled application from the correct build path
+# This path appears correct for your project named 'primebox'
 COPY --from=build /app/dist/primebox/browser /usr/share/nginx/html
 
-# Programmatically create the Nginx config to guarantee correct formatting
+# This Nginx configuration is correct for a single-page application.
+# It ensures that refreshing the browser on different routes (e.g., /products/123) works.
 RUN printf 'server {\n' > /etc/nginx/conf.d/default.conf && \
     printf '\tlisten 80;\n' >> /etc/nginx/conf.d/default.conf && \
     printf '\troot /usr/share/nginx/html;\n' >> /etc/nginx/conf.d/default.conf && \
