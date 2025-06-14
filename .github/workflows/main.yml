@@ -81,7 +81,7 @@ jobs:
             cat nginx.conf
 
             echo "--- Testing Nginx configuration syntax ---" # <--- THIS IS THE KEY TEST STEP
-            docker run --rm -v "$(pwd)/nginx.conf:/etc/nginx/conf.d/default.conf:ro" nginx:alpine nginx -t || \
+            docker compose -f docker-compose.prod.yml --env-file .env run --rm nginx-proxy nginx -t || \
             {
                 echo "CRITICAL ERROR: Nginx configuration test failed! See output above for details."
                 docker ps -a | grep app-nginx-proxy-1 && docker logs app-nginx-proxy-1 || true
