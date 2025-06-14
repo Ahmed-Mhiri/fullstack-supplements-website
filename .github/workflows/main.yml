@@ -35,8 +35,6 @@ jobs:
           push: true
           tags: ahmhi003/suppstore-frontend:latest
 
-  # --- THIS IS THE CORRECTED PART ---
-  # The 'deploy' job is now at the same indentation level as 'build-and-push'
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
@@ -53,6 +51,9 @@ jobs:
 
             # Create the production docker-compose file from a GitHub secret
             echo "${{ secrets.PROD_COMPOSE_FILE }}" > docker-compose.prod.yml
+
+            # Create the Nginx configuration file from a GitHub secret
+            echo "${{ secrets.NGINX_CONF_FILE }}" > nginx.conf
 
             # Create the .env file for database credentials from secrets
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
