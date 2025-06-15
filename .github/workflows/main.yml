@@ -1,5 +1,5 @@
 # File: .github/workflows/deploy.yml
-# Action: CORRECTED & RESTRUCTURED
+# Action: CORRECTED - Replaced 'git pull' with 'scp' for a more robust deployment
 
 name: Build, Push, and Deploy
 
@@ -51,21 +51,34 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to EC2 instance
+      - name: Checkout repository
+        # This step is needed to have the config files available for copying
+        uses: actions/checkout@v4
+
+      - name: Copy configuration files to EC2
+        # This action securely copies files to the target server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "docker-compose.prod.yml,nginx.conf"
+          target: "/home/ubuntu/app" # The directory to copy files to
+
+      - name: Execute deployment commands on EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            set -e # Exit immediately if a command exits with a non-zero status
+            set -e # Exit immediately if a command fails
 
-            # Navigate to the app directory (must be a git repository)
+            # Navigate to the app directory. The scp action creates it if it doesn't exist.
             cd /home/ubuntu/app
 
-            echo "--- Updating repository with latest changes ---"
-            git pull origin master
-
+            echo "--- Configuration files copied successfully ---"
+            
             echo "--- Creating .env file from secrets ---"
             > .env # Clear the file to ensure no old values remain
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
@@ -76,7 +89,7 @@ jobs:
             echo "--- Pulling latest Docker images ---"
             docker compose -f docker-compose.prod.yml --env-file .env pull
             
-            echo "--- Restarting services with updated images ---"
+            echo "--- Restarting services with updated configuration ---"
             docker compose -f docker-compose.prod.yml --env-file .env up -d --force-recreate --remove-orphans
 
             echo "--- Verifying running containers ---"
