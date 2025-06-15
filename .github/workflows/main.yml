@@ -68,10 +68,12 @@ jobs:
                 exit 1
             fi
             
-            # This sed command inserts the 'command:' line precisely after the 'depends_on:' block of nginx-proxy.
-            # It's robust against secret formatting issues.
-            sed -i '/nginx-proxy:/,/depends_on:/s/depends_on:/depends_on:\n            command: ["nginx", "-g", "daemon off;"]/' docker-compose.prod.yml
-            
+            # --- SUPER-FIXED SED COMMAND ---
+            # This command finds the 'nginx-proxy:' service block and then targets the line that
+            # has '- backend' (the last item in 'depends_on'). It inserts the 'command:' line
+            # *after* that last item, ensuring correct YAML structure and indentation.
+            sed -i '/nginx-proxy:/,/^depends_on:/{ /^- backend$/a\            command: ["nginx", "-g", "daemon off;"]' docker-compose.prod.yml
+
             # --- DEBUGGING: SHOW EXACT DOCKER-COMPOSE.PROD.YML CONTENT ---
             echo "--- Debugging: Final docker-compose.prod.yml content on EC2 (with od -c) ---"
             od -c docker-compose.prod.yml
