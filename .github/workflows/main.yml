@@ -102,8 +102,8 @@ jobs:
             echo "--- Pulling latest Docker images ---"
             docker compose -f docker-compose.prod.yml --env-file .env pull || { echo "ERROR: docker compose pull command failed."; exit 1; }
 
-            echo "--- Stopping and removing existing services (force recreate) ---"
-            docker compose -f docker-compose.prod.yml --env-file .env down --remove-orphans 2>&1 | tee docker-compose-down.log
+            echo "--- Stopping and removing existing services and volumes (force recreate) ---"
+            docker compose -f docker-compose.prod.yml --env-file .env down --remove-orphans -v 2>&1 | tee docker-compose-down.log
             cat docker-compose-down.log
 
             echo "--- Bringing up services in detached mode ---"
