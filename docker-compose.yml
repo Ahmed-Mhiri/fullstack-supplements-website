@@ -39,6 +39,7 @@ services:
     depends_on:
       - frontend
       - backend
+    command: ["nginx", "-g", "daemon off;"]
 
 volumes:
   db-data:
