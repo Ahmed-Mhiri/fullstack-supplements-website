@@ -1,3 +1,6 @@
+# File: .github/workflows/deploy.yml
+# Action: CORRECTED & RESTRUCTURED
+
 name: Build, Push, and Deploy
 
 on:
@@ -12,11 +15,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Get short Git SHA
         id: get_sha
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -31,10 +37,6 @@ jobs:
           tags: |
             ahmhi003/suppstore-backend:latest
             ahmhi003/suppstore-backend:${{ steps.get_sha.outputs.sha_short }}
-          build-args: |
-            DB_URL=jdbc:mysql://database:3306/supplements_db?useSSL=false&allowPublicKeyRetrieval=true
-            DB_USER=${{ secrets.SPRING_DATASOURCE_USERNAME }}
-            DB_PASS=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
             
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
@@ -49,90 +51,38 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4 # This pulls your repo, including docker-compose.prod.yml and nginx.conf
-
-      - name: Execute deployment commands on EC2
+      - name: Deploy to EC2 instance
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            set -eo pipefail # Exit immediately if a command exits with a non-zero status
+            set -e # Exit immediately if a command exits with a non-zero status
 
-            echo "--- Changing to application directory ---"
-            mkdir -p /home/ubuntu/app # Ensure directory exists
-            cd /home/ubuntu/app || { echo "ERROR: Directory /home/ubuntu/app not found on EC2. Exiting deployment."; exit 1; }
+            # Navigate to the app directory (must be a git repository)
+            cd /home/ubuntu/app
 
-            echo "--- Copying config files to EC2 via rsync ---"
-            # Use rsync to copy files from the GitHub Actions runner (current directory) to EC2
-            # The '$PWD' on the runner refers to github.workspace
-            rsync -avz --exclude '.git/' "$PWD/" "ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app/" || { echo "ERROR: rsync failed to copy files."; exit 1; }
-            
-            echo "--- Verifying copied files on EC2 ---"
-            ls -al /home/ubuntu/app/docker-compose.prod.yml
-            ls -al /home/ubuntu/app/nginx.conf
+            echo "--- Updating repository with latest changes ---"
+            git pull origin master
 
-            echo "--- Creating or updating .env file ---"
-            > .env # Clears existing .env file. This is crucial to prevent old variables from lingering.
+            echo "--- Creating .env file from secrets ---"
+            > .env # Clear the file to ensure no old values remain
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
             echo "IMAGE_TAG=${{ needs.build-and-push.outputs.version }}" >> .env
-            if [ ! -s .env ]; then
-                echo "ERROR: .env file was not created or is empty. Check related secrets."
-                exit 1
-            fi
-            echo "--- .env file contents ---"
-            cat .env
-
+            
             echo "--- Pulling latest Docker images ---"
-            docker compose -f docker-compose.prod.yml --env-file .env pull || { echo "ERROR: docker compose pull command failed."; exit 1; }
-
-            echo "Waiting 15 seconds for MySQL container to initialize..."
-            sleep 15 # Give MySQL time to start up and configure its user/db
-
-            echo "--- Stopping and removing existing services (force recreate) ---"
-            docker compose -f docker-compose.prod.yml --env-file .env down --remove-orphans 2>&1 | tee docker-compose-down.log
-            cat docker-compose-down.log
-
-            echo "Waiting 5 seconds before starting services..."
-            sleep 5
-
-            echo "--- Bringing up services in detached mode ---"
-            docker compose -f docker-compose.prod.yml --env-file .env up -d --force-recreate 2>&1 | tee docker-compose-up.log
-            COMPOSE_UP_EXIT_CODE=${PIPESTATUS[0]} # Capture the exit code of the docker compose up command
+            docker compose -f docker-compose.prod.yml --env-file .env pull
             
-            echo "--- docker compose up output ---"
-            cat docker-compose-up.log
-            
-            if [ $COMPOSE_UP_EXIT_CODE -ne 0 ]; then
-                echo "CRITICAL ERROR: 'docker compose up' command failed with exit code $COMPOSE_UP_EXIT_CODE."
-                echo "Review the 'docker-compose-up.log' above for details."
-                # Add additional diagnostics if docker compose up fails
-                echo "--- Attempting to show status of all containers ---"
-                docker ps -a
-                echo "--- Attempting to get logs for all relevant containers ---"
-                docker logs suppstore-db || true
-                docker logs suppstore-backend || true
-                docker logs app-frontend-1 || true
-                docker logs app-nginx-proxy-1 || true
-                exit 1
-            fi
+            echo "--- Restarting services with updated images ---"
+            docker compose -f docker-compose.prod.yml --env-file .env up -d --force-recreate --remove-orphans
 
-            echo "--- Verifying app-nginx-proxy-1 container status ---"
-            if ! docker ps | grep -q app-nginx-proxy-1; then
-                echo "CRITICAL ERROR: 'app-nginx-proxy-1' container is NOT running after deployment!"
-                echo "Attempting to get last logs for 'app-nginx-proxy-1' for diagnostics:"
-                docker logs app-nginx-proxy-1 || echo "Could not retrieve logs for app-nginx-proxy-1."
-                exit 1
-            fi
-            
-            echo "--- Deployment successful! Listing all running containers ---"
+            echo "--- Verifying running containers ---"
             docker ps
 
-            echo "--- Pruning old Docker images and volumes ---"
-            docker system prune -af || echo "WARNING: 'docker system prune' command failed. Check disk space manually."
+            echo "--- Cleaning up old Docker resources ---"
+            docker system prune -af
 
-            echo "Deployment pipeline completed successfully."
+            echo "--- Deployment successful! ---"
