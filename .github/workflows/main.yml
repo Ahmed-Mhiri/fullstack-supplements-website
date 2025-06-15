@@ -67,7 +67,11 @@ jobs:
                 echo "ERROR: docker-compose.prod.yml was not created or is empty. Check PROD_COMPOSE_FILE secret."
                 exit 1
             fi
-            cat docker-compose.prod.yml
+            
+            # Append the Nginx command directly and ensure correct YAML indentation
+            echo '    command: ["nginx", "-g", "daemon off;"]' >> docker-compose.prod.yml
+            
+            cat docker-compose.prod.yml # Display the final docker-compose file content for verification
 
             echo "--- Writing nginx.conf from secret ---"
             printf "%s" "${{ secrets.NGINX_CONF_FILE }}" > nginx.conf
@@ -78,11 +82,8 @@ jobs:
             cat nginx.conf
 
             echo "--- Testing Nginx configuration syntax ---"
-            # It's better to explicitly reference the service and ensure its image is available for testing.
-            # This requires the nginx-proxy image to be pulled or built before this step for the test to work.
-            # However, for a quick test, using the local nginx.conf with a temporary container is also an option.
-            # For simplicity, if the syntax is valid, docker compose up will succeed.
-            # The current command runs nginx -t within the context of docker compose, which is good.
+            # This command runs an Nginx syntax test within a temporary container
+            # It relies on the nginx-proxy image being accessible, which should be after `docker compose pull`
             docker compose -f docker-compose.prod.yml --env-file .env run --rm nginx-proxy nginx -t || \
             {
                 echo "CRITICAL ERROR: Nginx configuration test failed! See output above for details."
@@ -91,7 +92,7 @@ jobs:
             }
 
             echo "--- Creating or updating .env file ---"
-            > .env
+            > .env # Clears existing .env file
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
