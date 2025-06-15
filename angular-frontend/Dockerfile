@@ -29,5 +29,5 @@ RUN printf 'server {\n' > /etc/nginx/conf.d/default.conf && \
     printf '\t}\n' >> /etc/nginx/conf.d/default.conf && \
     printf '}\n' >> /etc/nginx/conf.d/default.conf
 
-# Expose Nginx's port
+# Expose Nginxs port
 EXPOSE 80
