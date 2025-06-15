@@ -49,7 +49,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy to EC2 using rsync
+      - name: Deploy configuration files and execute script
         uses: easingthemes/ssh-deploy@v5.0.0
         with:
           # SSH connection details
@@ -57,16 +57,17 @@ jobs:
           REMOTE_HOST: ${{ secrets.EC2_HOST }}
           REMOTE_USER: ${{ secrets.EC2_USERNAME }}
 
-          # Files to copy from the repository root to the server
-          SOURCE: "docker-compose.prod.yml,nginx.conf"
+          # The source is now the new 'deploy' directory.
+          # The trailing slash '/' is important, it means "copy the contents of the directory".
+          SOURCE: "deploy/"
           TARGET: "/home/ubuntu/app"
 
-          # Script to run on the server AFTER the files are copied
+          # The script to run on the server AFTER the files are copied
           SCRIPT_AFTER: |
             set -e
             cd /home/ubuntu/app
             
-            echo "--- Creating .env file from secrets ---"
+            echo "--- Creating .env file ---"
             > .env
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
@@ -74,6 +75,7 @@ jobs:
             echo "IMAGE_TAG=${{ needs.build-and-push.outputs.version }}" >> .env
             
             echo "--- Pulling new Docker images ---"
+            # The compose file is now in /home/ubuntu/app/docker-compose.prod.yml
             docker compose -f docker-compose.prod.yml --env-file .env pull
             
             echo "--- Restarting services ---"
