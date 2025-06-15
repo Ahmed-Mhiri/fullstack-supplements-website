@@ -68,10 +68,11 @@ jobs:
                 exit 1
             fi
             
-            # This line appends the Nginx command with correct indentation (4 spaces)
-            echo '    command: ["nginx", "-g", "daemon off;"]' >> docker-compose.prod.yml
+            # Use sed to insert the 'command' line precisely after the 'depends_on:' block of nginx-proxy
+            # This ensures correct placement regardless of trailing newlines in the secret.
+            sed -i '/nginx-proxy:/,/depends_on:/ { /depends_on:/a\    command: ["nginx", "-g", "daemon off;"]' docker-compose.prod.yml
             
-            # --- DEBUGGING: SHOW EXACT FILE CONTENT ---
+            # --- DEBUGGING: SHOW EXACT DOCKER-COMPOSE.PROD.YML CONTENT ---
             echo "--- Debugging: Final docker-compose.prod.yml content on EC2 (with od -c) ---"
             od -c docker-compose.prod.yml
             echo "--- End Debugging: od -c output ---"
@@ -85,12 +86,19 @@ jobs:
                 echo "ERROR: nginx.conf was not created or is empty. Check NGINX_CONF_FILE secret."
                 exit 1
             fi
-            cat nginx.conf
-
+            
+            # --- DEBUGGING: SHOW EXACT NGINX.CONF CONTENT ---
+            echo "--- Debugging: Final nginx.conf content on EC2 (with od -c) ---"
+            od -c nginx.conf
+            echo "--- End Debugging: od -c output ---"
+            
+            cat nginx.conf # Human-readable for quick check
+            
             echo "--- Testing Nginx configuration syntax ---"
             docker compose -f docker-compose.prod.yml --env-file .env run --rm nginx-proxy nginx -t || \
             {
                 echo "CRITICAL ERROR: Nginx configuration test failed! See output above for details."
+                # Attempt to get logs of the nginx-proxy container if it exists and failed
                 docker ps -a | grep app-nginx-proxy-1 && docker logs app-nginx-proxy-1 || true
                 exit 1
             }
