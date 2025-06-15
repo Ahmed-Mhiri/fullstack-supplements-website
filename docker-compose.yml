@@ -1,12 +1,11 @@
 version: '3.8'
-#cmon
 services:
   database:
     image: mysql:8.0
     container_name: suppstore-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} # This variable comes from the .env file written by the workflow
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: supplements_db
       MYSQL_USER: ${SPRING_DATASOURCE_USERNAME}
       MYSQL_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
@@ -39,7 +38,7 @@ services:
     depends_on:
       - frontend
       - backend
-    command: ["nginx", "-g", "daemon off;"]
+    # IMPORTANT: The 'command:' line is NOT here. It will be appended by the workflow.
 
 volumes:
   db-data:

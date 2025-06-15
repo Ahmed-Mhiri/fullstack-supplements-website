@@ -68,11 +68,15 @@ jobs:
                 exit 1
             fi
             
-            # This line appends the Nginx command with correct indentation
-            # It should be 4 spaces from the left margin of the 'nginx-proxy' service block.
+            # This line appends the Nginx command with correct indentation (4 spaces)
             echo '    command: ["nginx", "-g", "daemon off;"]' >> docker-compose.prod.yml
             
-            echo "--- Final docker-compose.prod.yml content on EC2 ---"
+            # --- DEBUGGING: SHOW EXACT FILE CONTENT ---
+            echo "--- Debugging: Final docker-compose.prod.yml content on EC2 (with od -c) ---"
+            od -c docker-compose.prod.yml
+            echo "--- End Debugging: od -c output ---"
+
+            echo "--- Final docker-compose.prod.yml content (human readable) ---"
             cat docker-compose.prod.yml # Display the final docker-compose file content for verification
 
             echo "--- Writing nginx.conf from secret ---"
