@@ -38,7 +38,7 @@ services:
     depends_on:
       - frontend
       - backend
-    # IMPORTANT: The 'command:' line is NOT here. It will be appended by the workflow.
+    command: ["nginx", "-g", "daemon off;"] # <--- NOW INCLUDED DIRECTLY IN THIS FILE
 
 volumes:
   db-data:
