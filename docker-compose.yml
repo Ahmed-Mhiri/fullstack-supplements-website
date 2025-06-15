@@ -19,6 +19,10 @@ services:
     restart: always
     depends_on:
       - database
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/supplements_db?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
 
   frontend:
     image: ahmhi003/suppstore-frontend:${IMAGE_TAG:-latest}
