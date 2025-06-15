@@ -68,9 +68,13 @@ jobs:
                 exit 1
             fi
             
-            # Use sed to insert the 'command' line precisely after the 'depends_on:' block of nginx-proxy
-            # This ensures correct placement regardless of trailing newlines in the secret.
-            sed -i '/nginx-proxy:/,/depends_on:/ { /depends_on:/a\    command: ["nginx", "-g", "daemon off;"]' docker-compose.prod.yml
+            # --- CORRECTED SED COMMAND ---
+            # This command inserts the 'command:' line immediately after the line
+            # containing 'depends_on:' within the 'nginx-proxy' service block.
+            # This is robust against secret formatting issues.
+            # The 'a\' command appends after the matched line.
+            # The indentation (12 spaces) aligns 'command:' properly under 'nginx-proxy' properties.
+            sed -i '/nginx-proxy:/,/depends_on:/s/depends_on:/depends_on:\n            command: ["nginx", "-g", "daemon off;"]/' docker-compose.prod.yml
             
             # --- DEBUGGING: SHOW EXACT DOCKER-COMPOSE.PROD.YML CONTENT ---
             echo "--- Debugging: Final docker-compose.prod.yml content on EC2 (with od -c) ---"
@@ -98,7 +102,6 @@ jobs:
             docker compose -f docker-compose.prod.yml --env-file .env run --rm nginx-proxy nginx -t || \
             {
                 echo "CRITICAL ERROR: Nginx configuration test failed! See output above for details."
-                # Attempt to get logs of the nginx-proxy container if it exists and failed
                 docker ps -a | grep app-nginx-proxy-1 && docker logs app-nginx-proxy-1 || true
                 exit 1
             }
