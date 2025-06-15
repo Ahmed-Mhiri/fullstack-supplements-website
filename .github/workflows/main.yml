@@ -1,5 +1,4 @@
 # File: .github/workflows/deploy.yml
-# Action: CORRECTED - Replaced 'git pull' with 'scp' for a more robust deployment
 
 name: Build, Push, and Deploy
 
@@ -34,68 +33,59 @@ jobs:
         with:
           context: ./store
           push: true
-          tags: |
-            ahmhi003/suppstore-backend:latest
-            ahmhi003/suppstore-backend:${{ steps.get_sha.outputs.sha_short }}
+          tags: ahmhi003/suppstore-backend:${{ steps.get_sha.outputs.sha_short }},ahmhi003/suppstore-backend:latest
             
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
           context: ./angular-frontend
           push: true
-          tags: |
-            ahmhi003/suppstore-frontend:latest
-            ahmhi003/suppstore-frontend:${{ steps.get_sha.outputs.sha_short }}
+          tags: ahmhi003/suppstore-frontend:${{ steps.get_sha.outputs.sha_short }},ahmhi003/suppstore-frontend:latest
 
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        # This step is needed to have the config files available for copying
         uses: actions/checkout@v4
 
+      - name: List files for verification
+        run: ls -lR
+        # This step helps you debug by showing all files in your project.
+
       - name: Copy configuration files to EC2
-        # This action securely copies files to the target server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           source: "docker-compose.prod.yml,nginx.conf"
-          target: "/home/ubuntu/app" # The directory to copy files to
+          target: "/home/ubuntu/app"
 
-      - name: Execute deployment commands on EC2
+      - name: Execute deployment on EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            set -e # Exit immediately if a command fails
-
-            # Navigate to the app directory. The scp action creates it if it doesn't exist.
+            set -e
             cd /home/ubuntu/app
-
-            echo "--- Configuration files copied successfully ---"
             
             echo "--- Creating .env file from secrets ---"
-            > .env # Clear the file to ensure no old values remain
+            > .env
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
             echo "IMAGE_TAG=${{ needs.build-and-push.outputs.version }}" >> .env
             
-            echo "--- Pulling latest Docker images ---"
+            echo "--- Pulling new Docker images ---"
             docker compose -f docker-compose.prod.yml --env-file .env pull
             
-            echo "--- Restarting services with updated configuration ---"
-            docker compose -f docker-compose.prod.yml --env-file .env up -d --force-recreate --remove-orphans
-
-            echo "--- Verifying running containers ---"
-            docker ps
-
-            echo "--- Cleaning up old Docker resources ---"
+            echo "--- Restarting services ---"
+            docker compose -f docker-compose.prod.yml --env-file .env up -d --force-recreate
+            
+            echo "--- Cleaning up old images ---"
             docker system prune -af
 
-            echo "--- Deployment successful! ---"
+            echo "--- Deployment Successful ---"

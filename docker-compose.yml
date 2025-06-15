@@ -1,5 +1,4 @@
-# File: docker-compose.prod.yml (in project root)
-# Action: CORRECTED & IMPROVED
+# File: docker-compose.prod.yml
 
 version: '3.8'
 services:
@@ -44,7 +43,6 @@ services:
     ports:
       - "80:80"
     volumes:
-      # Mounts the root nginx.conf to the proxy container
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - frontend
