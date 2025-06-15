@@ -68,9 +68,11 @@ jobs:
                 exit 1
             fi
             
-            # Append the Nginx command directly and ensure correct YAML indentation
+            # This line appends the Nginx command with correct indentation
+            # It should be 4 spaces from the left margin of the 'nginx-proxy' service block.
             echo '    command: ["nginx", "-g", "daemon off;"]' >> docker-compose.prod.yml
             
+            echo "--- Final docker-compose.prod.yml content on EC2 ---"
             cat docker-compose.prod.yml # Display the final docker-compose file content for verification
 
             echo "--- Writing nginx.conf from secret ---"
@@ -82,8 +84,6 @@ jobs:
             cat nginx.conf
 
             echo "--- Testing Nginx configuration syntax ---"
-            # This command runs an Nginx syntax test within a temporary container
-            # It relies on the nginx-proxy image being accessible, which should be after `docker compose pull`
             docker compose -f docker-compose.prod.yml --env-file .env run --rm nginx-proxy nginx -t || \
             {
                 echo "CRITICAL ERROR: Nginx configuration test failed! See output above for details."
