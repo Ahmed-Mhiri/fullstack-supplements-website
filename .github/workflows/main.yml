@@ -49,7 +49,19 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to EC2 instance
+      - name: Checkout repository
+        uses: actions/checkout@v4 # This step pulls your repo, including docker-compose.prod.yml and nginx.conf
+
+      - name: Copy config files to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "docker-compose.prod.yml,nginx.conf" # Files to copy from your repo root
+          target: "/home/ubuntu/app" # Destination directory on EC2
+
+      - name: Execute deployment commands on EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -61,50 +73,6 @@ jobs:
             echo "--- Changing to application directory ---"
             cd /home/ubuntu/app || { echo "ERROR: Directory /home/ubuntu/app not found on EC2. Exiting deployment."; exit 1; }
 
-            echo "--- Writing docker-compose.prod.yml from secret ---"
-            printf "%s" "${{ secrets.PROD_COMPOSE_FILE }}" > docker-compose.prod.yml
-            if [ ! -s docker-compose.prod.yml ]; then
-                echo "ERROR: docker-compose.prod.yml was not created or is empty. Check PROD_COMPOSE_FILE secret."
-                exit 1
-            fi
-            
-            # --- SUPER-FIXED SED COMMAND ---
-            # This command finds the 'nginx-proxy:' service block and then targets the line that
-            # has '- backend' (the last item in 'depends_on'). It inserts the 'command:' line
-            # *after* that last item, ensuring correct YAML structure and indentation.
-            sed -i '/nginx-proxy:/,/^depends_on:/{ /^- backend$/a\            command: ["nginx", "-g", "daemon off;"]' docker-compose.prod.yml
-
-            # --- DEBUGGING: SHOW EXACT DOCKER-COMPOSE.PROD.YML CONTENT ---
-            echo "--- Debugging: Final docker-compose.prod.yml content on EC2 (with od -c) ---"
-            od -c docker-compose.prod.yml
-            echo "--- End Debugging: od -c output ---"
-
-            echo "--- Final docker-compose.prod.yml content (human readable) ---"
-            cat docker-compose.prod.yml # Display the final docker-compose file content for verification
-
-            echo "--- Writing nginx.conf from secret (Base64 Decoded) ---"
-            # This line decodes the Base64 secret and writes it to nginx.conf
-            echo "${{ secrets.NGINX_CONF_FILE }}" | base64 -d > nginx.conf
-            if [ ! -s nginx.conf ]; then
-                echo "ERROR: nginx.conf was not created or is empty. Check NGINX_CONF_FILE secret."
-                exit 1
-            fi
-            
-            # --- DEBUGGING: SHOW EXACT NGINX.CONF CONTENT ---
-            echo "--- Debugging: Final nginx.conf content on EC2 (with od -c) ---"
-            od -c nginx.conf
-            echo "--- End Debugging: od -c output ---"
-            
-            cat nginx.conf # Human-readable for quick check
-            
-            echo "--- Testing Nginx configuration syntax ---"
-            docker compose -f docker-compose.prod.yml --env-file .env run --rm nginx-proxy nginx -t || \
-            {
-                echo "CRITICAL ERROR: Nginx configuration test failed! See output above for details."
-                docker ps -a | grep app-nginx-proxy-1 && docker logs app-nginx-proxy-1 || true
-                exit 1
-            }
-
             echo "--- Creating or updating .env file ---"
             > .env # Clears existing .env file
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
@@ -115,7 +83,6 @@ jobs:
                 echo "ERROR: .env file was not created or is empty. Check related secrets."
                 exit 1
             fi
-
             echo "--- .env file contents ---"
             cat .env
 
