@@ -6,7 +6,7 @@ import { Supplement } from '../../models/supplement.model';
 import { CartResumeComponent } from "../cart-resume/cart-resume.component";
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-checkout',

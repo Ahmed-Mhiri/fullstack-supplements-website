@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, map, Observable, of } from 'rxjs';
 import { Supplement } from '../models/supplement.model'; // Ensure this path is correct
 import { PaginatedResponse } from '../models/paginated-response'; // Ensure this path is correct  
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'

@@ -1,87 +1,56 @@
-# File: .github/workflows/deploy.yml
-
 name: Build, Push, and Deploy
-
 on:
   push:
-    branches: [ "master" ]
-
+    branches: [master]
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get_sha.outputs.sha_short }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Get short Git SHA
         id: get_sha
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
-      - name: Build and push backend image
-        uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v5
         with:
           context: ./store
           push: true
           tags: ahmhi003/suppstore-backend:${{ steps.get_sha.outputs.sha_short }},ahmhi003/suppstore-backend:latest
-            
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v5
+      - uses: docker/build-push-action@v5
         with:
           context: ./angular-frontend
           push: true
           tags: ahmhi003/suppstore-frontend:${{ steps.get_sha.outputs.sha_short }},ahmhi003/suppstore-frontend:latest
-
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Deploy configuration files and execute script
-        uses: easingthemes/ssh-deploy@v5.0.0
+      - uses: actions/checkout@v4
+      - uses: easingthemes/ssh-deploy@v5.0.0
         with:
-          # SSH connection details
           SSH_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
           REMOTE_HOST: ${{ secrets.EC2_HOST }}
           REMOTE_USER: ${{ secrets.EC2_USERNAME }}
-
-          # The source is now the new 'deploy' directory.
-          # The trailing slash '/' is important, it means "copy the contents of the directory".
           SOURCE: "deploy/"
           TARGET: "/home/ubuntu/app"
-
-          # The script to run on the server AFTER the files are copied
           SCRIPT_AFTER: |
             set -e
             cd /home/ubuntu/app
-            
-            echo "--- Creating .env file ---"
+            echo "--- Creating .env file from secrets ---"
             > .env
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
             echo "IMAGE_TAG=${{ needs.build-and-push.outputs.version }}" >> .env
-            
             echo "--- Pulling new Docker images ---"
-            # The compose file is now in /home/ubuntu/app/docker-compose.prod.yml
-            docker compose -f docker-compose.prod.yml --env-file .env pull
-            
+            docker compose -f docker-compose.prod.yml pull
             echo "--- Restarting services ---"
-            docker compose -f docker-compose.prod.yml --env-file .env up -d --force-recreate
-            
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
             echo "--- Cleaning up old images ---"
             docker system prune -af
-
-            echo "--- Deployment Successful ---"
