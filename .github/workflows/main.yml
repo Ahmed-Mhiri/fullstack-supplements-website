@@ -50,16 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # This step pulls your repo, including docker-compose.prod.yml and nginx.conf
-
-      - name: Copy config files to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          source: "docker-compose.prod.yml,nginx.conf" # Files to copy from your repo root
-          target: "/home/ubuntu/app" # Destination directory on EC2
+        uses: actions/checkout@v4 # This pulls your repo, including docker-compose.prod.yml and nginx.conf
 
       - name: Execute deployment commands on EC2
         uses: appleboy/ssh-action@master
@@ -68,13 +59,23 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            set -eo pipefail
+            set -eo pipefail # Exit immediately if a command exits with a non-zero status
 
             echo "--- Changing to application directory ---"
+            mkdir -p /home/ubuntu/app # Ensure directory exists
             cd /home/ubuntu/app || { echo "ERROR: Directory /home/ubuntu/app not found on EC2. Exiting deployment."; exit 1; }
 
+            echo "--- Copying config files to EC2 via rsync ---"
+            # Use rsync to copy files from the GitHub Actions runner (current directory) to EC2
+            # The '$PWD' on the runner refers to github.workspace
+            rsync -avz --exclude '.git/' "$PWD/" "ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/app/" || { echo "ERROR: rsync failed to copy files."; exit 1; }
+            
+            echo "--- Verifying copied files on EC2 ---"
+            ls -al /home/ubuntu/app/docker-compose.prod.yml
+            ls -al /home/ubuntu/app/nginx.conf
+
             echo "--- Creating or updating .env file ---"
-            > .env # Clears existing .env file
+            > .env # Clears existing .env file. This is crucial to prevent old variables from lingering.
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
@@ -90,7 +91,7 @@ jobs:
             docker compose -f docker-compose.prod.yml --env-file .env pull || { echo "ERROR: docker compose pull command failed."; exit 1; }
 
             echo "Waiting 15 seconds for MySQL container to initialize..."
-            sleep 15
+            sleep 15 # Give MySQL time to start up and configure its user/db
 
             echo "--- Stopping and removing existing services (force recreate) ---"
             docker compose -f docker-compose.prod.yml --env-file .env down --remove-orphans 2>&1 | tee docker-compose-down.log
@@ -101,7 +102,7 @@ jobs:
 
             echo "--- Bringing up services in detached mode ---"
             docker compose -f docker-compose.prod.yml --env-file .env up -d --force-recreate 2>&1 | tee docker-compose-up.log
-            COMPOSE_UP_EXIT_CODE=${PIPESTATUS[0]}
+            COMPOSE_UP_EXIT_CODE=${PIPESTATUS[0]} # Capture the exit code of the docker compose up command
             
             echo "--- docker compose up output ---"
             cat docker-compose-up.log
@@ -109,6 +110,14 @@ jobs:
             if [ $COMPOSE_UP_EXIT_CODE -ne 0 ]; then
                 echo "CRITICAL ERROR: 'docker compose up' command failed with exit code $COMPOSE_UP_EXIT_CODE."
                 echo "Review the 'docker-compose-up.log' above for details."
+                # Add additional diagnostics if docker compose up fails
+                echo "--- Attempting to show status of all containers ---"
+                docker ps -a
+                echo "--- Attempting to get logs for all relevant containers ---"
+                docker logs suppstore-db || true
+                docker logs suppstore-backend || true
+                docker logs app-frontend-1 || true
+                docker logs app-nginx-proxy-1 || true
                 exit 1
             fi
 
