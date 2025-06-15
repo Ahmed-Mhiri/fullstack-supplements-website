@@ -1,4 +1,3 @@
-# .github/workflows/main.yml
 name: Build, Push, and Deploy
 
 on:
@@ -63,7 +62,7 @@ jobs:
             cd /home/ubuntu/app || { echo "ERROR: Directory /home/ubuntu/app not found on EC2. Exiting deployment."; exit 1; }
 
             echo "--- Writing docker-compose.prod.yml from secret ---"
-            echo "${{ secrets.PROD_COMPOSE_FILE }}" > docker-compose.prod.yml
+            printf "%s" "${{ secrets.PROD_COMPOSE_FILE }}" > docker-compose.prod.yml
             if [ ! -s docker-compose.prod.yml ]; then
                 echo "ERROR: docker-compose.prod.yml was not created or is empty. Check PROD_COMPOSE_FILE secret."
                 exit 1
@@ -71,7 +70,7 @@ jobs:
             cat docker-compose.prod.yml
 
             echo "--- Writing nginx.conf from secret ---"
-            echo "${{ secrets.NGINX_CONF_FILE }}" > nginx.conf
+            printf "%s" "${{ secrets.NGINX_CONF_FILE }}" > nginx.conf
             if [ ! -s nginx.conf ]; then
                 echo "ERROR: nginx.conf was not created or is empty. Check NGINX_CONF_FILE secret."
                 exit 1
@@ -79,6 +78,11 @@ jobs:
             cat nginx.conf
 
             echo "--- Testing Nginx configuration syntax ---"
+            # It's better to explicitly reference the service and ensure its image is available for testing.
+            # This requires the nginx-proxy image to be pulled or built before this step for the test to work.
+            # However, for a quick test, using the local nginx.conf with a temporary container is also an option.
+            # For simplicity, if the syntax is valid, docker compose up will succeed.
+            # The current command runs nginx -t within the context of docker compose, which is good.
             docker compose -f docker-compose.prod.yml --env-file .env run --rm nginx-proxy nginx -t || \
             {
                 echo "CRITICAL ERROR: Nginx configuration test failed! See output above for details."
